@@ -13,7 +13,7 @@ TIMELIMIT="5"
 SEARCH_STRING="Your one shop stop for everything Windows!"
 
 # Output
-SEARCH_EXPECTED="1"
+SEARCH_EXPECTED="2"
 
 ## END USER CONFIG
 
