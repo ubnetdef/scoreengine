@@ -1,1 +1,5 @@
+# Compiled python
 *.pyc
+
+# Silly DS_Store
+.DS_Store
