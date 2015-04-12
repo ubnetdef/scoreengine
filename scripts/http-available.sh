@@ -13,7 +13,7 @@ TIMELIMIT="5"
 
 HOST=$1
 PORT=$2
-COMMAND="curl -sL --max-time $TIMELIMIT -w %{http_code} 'http://$HOST:$PORT' -o /dev/null"
+COMMAND="curl -sL --max-time $TIMELIMIT -w %{http_code} 'http://$HOST:$PORT/wordpress' -o /dev/null"
 OUTPUT=$(eval $COMMAND)
 
 echo "ScoreEngine Module: http-available"

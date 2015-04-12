@@ -1,7 +1,8 @@
 import time
 
 """
-- team thread
+Master Thread Object
+
     - responsible for creating new "check" threads
     - reports to master thread a check
 """
@@ -14,10 +15,10 @@ class Team(object):
         self.name = name
     
     def main(self):
+        self.master.log("Team", "%s management thread started" % self.name)
+        
         while 1:
-            #time.sleep(60)
-            
             self.master.log("Team", "Starting checks for %s" % self.name)
             self.master.createTeamChecks(self.id)
             
-            time.sleep(60)
+            time.sleep(self.master.config['interval'])

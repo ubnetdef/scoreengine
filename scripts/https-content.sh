@@ -20,7 +20,7 @@ SEARCH_EXPECTED="1"
 HOST=$1
 PORT=$2
 
-COMMAND="curl -sLk --max-time $TIMELIMIT 'https://$HOST:$PORT' | grep -c '<hidden>'"
+COMMAND="curl -sLk --max-time $TIMELIMIT 'https://$HOST:$PORT/wordpress' | grep -c '<hidden>'"
 REAL_COMMAND=$(echo $COMMAND | sed "s/<hidden>/${SEARCH_STRING}/g")
 OUTPUT=$(eval $REAL_COMMAND)
 

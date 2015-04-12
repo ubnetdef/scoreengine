@@ -1,7 +1,8 @@
 import subprocess
 
 """
-- check thread
+Check Thread Object
+
     - responsible for calling the bash script, and reporting back to the
 team thread
 """
