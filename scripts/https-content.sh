@@ -10,7 +10,7 @@ fi
 TIMELIMIT="5"
 
 # Item to search for
-SEARCH_STRING="<title>Google<\/title>"
+SEARCH_STRING="Your one shop stop for everything Windows!"
 
 # Output
 SEARCH_EXPECTED="1"
