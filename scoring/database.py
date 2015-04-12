@@ -14,8 +14,8 @@ class Database(object):
         
         self.connect()
     
-    def connect(self, config):
-        self.conn = mysql.connector.connect()
+    def connect(self):
+        self.conn = mysql.connector.connect(**self.config)
     
     def addScore(self, team, service, status, output):
         query = "INSERT INTO checks(team_id, service_id, time, status, output)" \
