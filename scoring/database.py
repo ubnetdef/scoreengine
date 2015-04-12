@@ -14,7 +14,7 @@ class Database(object):
         
         self.connect()
     
-    def connect(config):
+    def connect(self, config):
         self.conn = mysql.connector.connect()
     
     def addScore(self, team, service, status, output):
