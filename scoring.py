@@ -12,7 +12,7 @@ db = Database({
     'buffered': True,
 })
 master = Master(db, {
-    'scripts': '/Users/james/Scripts/ScoreEngine/scripts/%s',
+    'scripts': '/var/scoreengine/scripts/%s',
     'interval': 60,
     'ip_changing': False,
     'ip_allocated': [
