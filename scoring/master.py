@@ -14,7 +14,7 @@ class Master(object):
     def __init__(self, db, config):
         self.db = db
         self.config = config
-        self.checksPaused = false
+        self.checksPaused = False
     
     def addScore(self, team, service, status, output):
         self.db.addScore(team, service, status, output)
