@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ $# -ne 4 ]; then
+if [ $# -ne 5 ]; then
 	echo "Usage: $0 [host] [port] [user] [pass] [testfile]"
 	exit 1
 fi
@@ -34,7 +34,7 @@ EXPECTED_OUTPUT=2
 COMMAND="grep -c 'complete' $FTPLOG"
 OUTPUT=$(eval $COMMAND)
 
-echo "ScoreEngine Module: ftp_check"
+echo "ScoreEngine Module: ftp_checka"
 echo
 echo "EXPECTED: $EXPECTED_OUTPUT"
 echo "OUTPUT: $OUTPUT"
