@@ -4,7 +4,7 @@ if [ $# -ne 4 ]; then
 	exit 1
 fi
 
-UUID=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)
+UUID=$(openssl rand -hex 10)
 
 ## USER CONFIG
 # Time limit, in seconds
