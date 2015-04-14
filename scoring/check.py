@@ -24,13 +24,12 @@ class Check(object):
             self.master.log("Check", desc_start)
         
         script = ["/bin/bash", self.script] + self.args
-        
-        proc = subprocess.Popen(script, executable="/bin/bash", stdout=subprocess.PIPE)
-        proc.wait()
-        
-        output = proc.stdout.read()
+
+        proc = subprocess.Popen(script, executable="/bin/bash", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (output, stderr) = proc.communicate()
+
         status = proc.returncode
-        
+
         if addLog == True:
             self.master.addScore(self.teamid, self.serviceid, status, output)
         
