@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+
+from scoring.database import Database
+from scoring.master import Master
+from scoring.check import Check
+import sys
+
+db = Database({
+    'user': 'score_engine',
+    'password': 'scoreengine',
+    'host': '192.168.1.110',
+    'database': 'scoring',
+    'raise_on_warnings': True,
+    'buffered': True,
+})
+master = Master(db, {
+    'scripts': '/Users/james/Scripts/ScoreEngine/scripts/%s',
+    'interval': 60,
+    'ip_changing': False,
+    'ip_allocated': [
+        '192.168.1.101',
+        '192.168.1.67',
+        '192.168.1.123',
+        '192.168.1.228'
+    ],
+})
+
+def check(team_id, service_id):
+    conn = db.conn
+    cursor1 = conn.cursor()
+    cursor2 = conn.cursor()
+
+    """ Don't hate me pls, for some reason 'SELECT * FROM services WHERE id = %s' doesnt work """
+    query = "SELECT * FROM services WHERE id = " + str(service_id)
+    cursor1.execute(query)
+    row = cursor1.fetchone()
+
+    if row is not None:
+        service_id = row[0]
+        service_name = row[1]
+        module = row[2]
+    
+        cursor2.execute("SELECT `value` FROM services_data WHERE team_id = %s AND service_id = %s ORDER BY `order` ASC", (team_id, service_id))
+    
+        args = []
+        data = cursor2.fetchone()
+    
+        while data is not None:
+            args.append(data[0])
+        
+            data = cursor2.fetchone()
+    else:
+        sys.exit("[FAIL] Service ID does not exist")
+
+    cursor1.close()
+    cursor2.close()
+
+    module = master.config['scripts'] % (module)
+    check = Check(master, team_id, service_id, "", module, args)
+    (status, output) = check.main(addLog=False, addScore=False)
+
+    print output
+    print "Status: " + ("PASS" if status == 0 else "FAIL")
+
+if len(sys.argv) == 1:
+    sys.exit("Usage: check [team-id] [check-id]")
+else:
+    check(int(sys.argv[1]), int(sys.argv[2]))
