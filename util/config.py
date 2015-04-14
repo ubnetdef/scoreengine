@@ -4,7 +4,7 @@ import ConfigParser
 Taken from https://wiki.python.org/moin/ConfigParserExamples
 """
 def getConfig(file, section):
-    bool_list = ['raise_on_warnings', 'buffered', 'ip_changing']
+    bool_list = ['raise_on_warnings', 'buffered', 'ip_changing', 'logging']
     int_list = ['interval']
     
     dict1 = {}

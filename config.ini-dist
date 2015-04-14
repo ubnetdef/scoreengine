@@ -8,6 +8,8 @@ buffered: True
 
 [main]
 scripts: /var/scoreengine/scripts/%s
+logging: True
+log_directory: /var/log/scoreengine/%s
 interval: 60
 ip_changing: False
 ip_allocated: 192.168.1.1
