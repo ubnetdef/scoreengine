@@ -5,8 +5,9 @@ Scoring Engine used for UBNETDEF's Cyber Security Competition
 * python 2.7
 * python module: mysql-connector
 * MySQL
-* curl
-* sshpass
+* curl [for http/https check]
+* sshpass [for ssh check]
+* lftp [for ftp check]
 
 ## Installation
 * Clone this repository
