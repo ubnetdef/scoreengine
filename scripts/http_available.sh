@@ -7,7 +7,7 @@ fi
 
 ## USER CONFIG
 # Time limit, in seconds
-TIMELIMIT=5
+TIMELIMIT=13
 
 ## END USER CONFIG
 

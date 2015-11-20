@@ -7,7 +7,7 @@ fi
 
 ## USER CONFIG
 # Time limit, in seconds
-TIMELIMIT=5
+TIMELIMIT=13
 
 # Item to search for
 SEARCH_STRING="Your one shop stop for everything Windows!"

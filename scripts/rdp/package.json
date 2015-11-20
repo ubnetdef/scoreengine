@@ -1,0 +1,15 @@
+{
+  "name": "rdptest",
+  "version": "0.0.1",
+  "description": "Checks if a user is able to log into a RDP server",
+  "main": "rdptest",
+  "dependencies": {
+    "node-rdpjs": "^0.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "James Droste <james@droste.im>",
+  "license": "MIT"
+}

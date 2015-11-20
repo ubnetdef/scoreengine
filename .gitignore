@@ -1,6 +1,9 @@
 # Compiled python
 *.pyc
 
+# node_modules from rdp
+scripts/rdp/node_modules
+
 # Silly DS_Store
 .DS_Store
 
