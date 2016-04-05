@@ -1,8 +1,27 @@
-# Compiled python
-*.pyc
+# User specific & automatically generated files #
+#################################################
+venv
+app.db
+config.py
 
-# Silly DS_Store
+# Python #
+##########
+*.py[co]
+*.egg
+*.egg-info
+
+# IDE and editor specific files #
+#################################
+/nbproject
+.idea
+
+# OS generated files #
+######################
 .DS_Store
-
-# Config files
-config.ini
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
