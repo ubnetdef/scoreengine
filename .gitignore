@@ -1,11 +1,27 @@
-# Compiled python
-*.pyc
+# User specific & automatically generated files #
+#################################################
+venv
+app.db
+config.py
 
-# node_modules from rdp
-scripts/rdp/node_modules
+# Python #
+##########
+*.py[co]
+*.egg
+*.egg-info
 
-# Silly DS_Store
+# IDE and editor specific files #
+#################################
+/nbproject
+.idea
+
+# OS generated files #
+######################
 .DS_Store
-
-# Config files
-config.ini
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
