@@ -71,8 +71,8 @@ class Check(Base):
 	output = db.Column(db.Text)
 
 	def __init__(self, team, service, passed, output):
-		self.team = team
-		self.service = service
+		self.team_id = team
+		self.service_id = service
 		self.passed = passed
 		self.output = output
 		self.time = datetime.utcnow()

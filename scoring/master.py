@@ -1,5 +1,5 @@
 from scoring import Session
-from scoring.models import Team, Service, TeamService
+from scoring.models import Team, Service, TeamService, Check
 from datetime import datetime
 from time import sleep
 from thread import start_new_thread, allocate_lock
@@ -28,9 +28,12 @@ class Master(object):
 			sleep(60)
 
 	def new_round(self):
+		# Make a new session for this thread
+		session = Session()
+
 		# Get all the active teams for this round
 		teams = []
-		for team in self.session.query(Team).filter(Team.enabled == True):
+		for team in session.query(Team).filter(Team.enabled == True):
 			teams.append({
 				'id': team.id,
 				'name': team.name
@@ -38,7 +41,7 @@ class Master(object):
 
 		# Get all active services for this round
 		services = []
-		for service in self.session.query(Service).filter(Service.enabled == True):
+		for service in session.query(Service).filter(Service.enabled == True):
 			services.append({
 				'id': service.id,
 				'name': service.name,
@@ -46,13 +49,16 @@ class Master(object):
 				'check': service.check
 			})
 
+		# Close the session
+		session.close()
+
 		# Start the checks!
 		for team in teams:
 			for service in services:
-				start_new_thread(self.new_check, (team, service,))
+				start_new_thread(self.new_check, (team, service))
 
-	def new_check(self, team, service):
-		check = Check(team, service, Session(), self.lock)
+	def new_check(self, team, service, dryRun=False):
+		check = ServiceCheck(team, service, Session(), self.lock)
 
 		check.run()
 
@@ -63,7 +69,13 @@ class Master(object):
 		print "---------[ PASSED: %r" % (check.getPassed())
 		self.lock.release()
 
-class Check(object):
+		if not dryRun:
+			session = Session()
+			session.add(Check(team["id"], service["id"], check.getPassed(), "\n".join(check.getOutput())))
+			session.commit()
+			session.close()
+
+class ServiceCheck(object):
 	def __init__(self, team, service, session, lock):
 		self.team = team
 		self.service = service
@@ -75,7 +87,7 @@ class Check(object):
 
 	def run(self):
 		# Get all the service data for this check
-		checkDataDB = Session().query(TeamService)\
+		checkDataDB = self.session.query(TeamService)\
 					.filter(TeamService.team_id == self.team["id"])\
 					.filter(TeamService.service_id == self.service["id"])\
 					.order_by(TeamService.order)
@@ -103,6 +115,9 @@ class Check(object):
 
 		# Call it!
 		self.getCheck()(self, checkData)
+
+		# Close the session
+		self.session.close()
 
 	def getCheck(self):
 		group = importlib.import_module('scoring.checks.%s' % (self.service["group"]))
