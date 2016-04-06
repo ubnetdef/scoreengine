@@ -45,7 +45,7 @@ class TeamService(Base):
 	edit = db.Column(db.Boolean)
 	order = db.Column(db.Integer)
 
-	def __int__(self, team, service, key, value, edit=True, order=0):
+	def __init__(self, team, service, key, value, edit=True, order=0):
 		self.team = team
 		self.service = service
 		self.key = key
