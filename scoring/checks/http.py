@@ -75,4 +75,4 @@ def check_custom_lockdownv0(check, data):
 
 	# It passed all our checks, gg.
 	check.setPassed()
-	check.addOutput("Check sucessful!")
+	check.addOutput("Check successful!")

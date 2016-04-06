@@ -37,7 +37,7 @@ def check_dns(check, data):
 
 		# We're good!
 		check.setPassed()
-		check.addOutput("Check sucessful!")
+		check.addOutput("Check successful!")
 	except Exception as e:
 		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
 

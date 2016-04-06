@@ -52,10 +52,11 @@ try:
 		# AD
 		session.add_all([
 			TeamService(teams[i], service_ad, "HOST", "10.%d.1.10" % (i), order=0),
-			TeamService(teams[i], service_ad, "LOOKUP_USER", "ad\Administrator", edit=False, order=2),
+			TeamService(teams[i], service_ad, "DOMAIN", "OBM%02d" % (i), edit=False, order=1),
+			TeamService(teams[i], service_ad, "LOOKUP_USER", "ad\Administrator", edit=False, order=3),
 
 			# User's to use
-			TeamService(teams[i], service_ad, "USERPASS", "ad\mal||changeme", order=1)
+			TeamService(teams[i], service_ad, "USERPASS", "ad\mal||changeme", order=2)
 		])
 
 		# HTTP
