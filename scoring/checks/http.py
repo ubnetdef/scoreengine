@@ -35,44 +35,49 @@ def check_custom_lockdownv0(check, data):
 
 	check.addOutput("Starting check...")
 
-	# Connect to the website
-	check.addOutput("Connecting to http://%s:%s" % (data["HOST"], data["PORT"]))
-	session = requests.Session()
-	req = session.get("http://%s:%s" % (data["HOST"], data["PORT"]), timeout=http_config["timeout"], cookies=cookie)
-	check.addOutput("Connected!")
+	try:
+		# Connect to the website
+		check.addOutput("Connecting to http://%s:%s" % (data["HOST"], data["PORT"]))
+		session = requests.Session()
+		req = session.get("http://%s:%s" % (data["HOST"], data["PORT"]), timeout=http_config["timeout"], cookies=cookie)
+		check.addOutput("Connected!")
 
-	# Search for "x-injectengine-check"
-	check.addOutput("Checking page...")
-	matches = re.search("<meta name=\"x-injectengine-check\" content=\"(.*)\">", req.text)
+		# Search for "x-injectengine-check"
+		check.addOutput("Checking page...")
+		matches = re.search("<meta name=\"x-injectengine-check\" content=\"(.*)\">", req.text)
 
-	if matches is None:
-		check.addOutput("Check failed on part 1!")
+		if matches is None:
+			check.addOutput("Check failed on part 1!")
+			return
+
+		magicText = matches.group(1).split("|")
+
+		if len(magicText) is not 3:
+			check.addOutput("Check failed on part 2!")
+			return
+
+		actualUsername = magicText[0]
+		actualTime = datetime.fromtimestamp(int(magicText[1]))
+		actualHash = magicText[2]
+
+		expectedHash = sha1("%s%s%s%s" % (data["USER"], magicText[1], sha1(data["PASS"]).hexdigest(), randomCheck)).hexdigest()
+
+		if b64encode(data["USER"]) != actualUsername:
+			check.addOutput("Check failed on part 3!")
+			return
+
+		if actualTime < datetime.now() - timedelta(seconds=http_config["lockdownv0_lateness"]):
+			check.addOutput("Check failed on part 4!")
+			return
+
+		if actualHash != expectedHash:
+			check.addOutput("Check failed on part 5!")
+			return
+
+		# It passed all our checks, gg.
+		check.setPassed()
+		check.addOutput("Check successful!")
+	except Exception as e:
+		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
+
 		return
-
-	magicText = matches.group(1).split("|")
-
-	if len(magicText) is not 3:
-		check.addOutput("Check failed on part 2!")
-		return
-
-	actualUsername = magicText[0]
-	actualTime = datetime.fromtimestamp(int(magicText[1]))
-	actualHash = magicText[2]
-
-	expectedHash = sha1("%s%s%s%s" % (data["USER"], magicText[1], sha1(data["PASS"]).hexdigest(), randomCheck)).hexdigest()
-
-	if b64encode(data["USER"]) != actualUsername:
-		check.addOutput("Check failed on part 3!")
-		return
-
-	if actualTime < datetime.now() - timedelta(seconds=http_config["lockdownv0_lateness"]):
-		check.addOutput("Check failed on part 4!")
-		return
-
-	if actualHash != expectedHash:
-		check.addOutput("Check failed on part 5!")
-		return
-
-	# It passed all our checks, gg.
-	check.setPassed()
-	check.addOutput("Check successful!")

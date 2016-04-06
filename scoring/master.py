@@ -17,7 +17,7 @@ class Master(object):
 		self.started = datetime.utcnow()
 		self.round = 0
 
-		self.lock = allocate_lock()
+		self.printLock = allocate_lock()
 		self.session = Session()
 
 	def run(self):
@@ -58,29 +58,33 @@ class Master(object):
 				start_new_thread(self.new_check, (team, service))
 
 	def new_check(self, team, service, dryRun=False):
-		check = ServiceCheck(team, service, Session(), self.lock)
+		check = ServiceCheck(team, service, Session())
 
 		check.run()
 
-		self.lock.acquire()
-		print "---------[ TEAM: %s | SERVICE: %s" % (team["name"], service["name"])
-		for line in check.getOutput():
-			print line
-		print "---------[ PASSED: %r" % (check.getPassed())
-		self.lock.release()
-
-		if not dryRun:
+		if dryRun:
+			self.printLock.acquire()
+			print "---------[ TEAM: %s | SERVICE: %s" % (team["name"], service["name"])
+			for line in check.getOutput():
+				print line
+			print "---------[ PASSED: %r" % (check.getPassed())
+			self.printLock.release()
+		else:
 			session = Session()
 			session.add(Check(team["id"], service["id"], check.getPassed(), "\n".join(check.getOutput())))
 			session.commit()
 			session.close()
 
+			# Print out some data
+			self.printLock.acquire()
+			print "Round: %04d | %s | Service: %s | Passed: %r" % (self.round, team["name"].ljust(8), service["name"].ljust(10), check.getPassed())
+			self.printLock.release()
+
 class ServiceCheck(object):
-	def __init__(self, team, service, session, lock):
+	def __init__(self, team, service, session):
 		self.team = team
 		self.service = service
 		self.session = session
-		self.lock = lock
 
 		self.passed = False
 		self.output = []
