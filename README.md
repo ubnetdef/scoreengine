@@ -5,9 +5,13 @@ Scoring Engine used for UBNETDEF's [Lockdown](https://lockdown.ubnetdef.org) Com
 * python 2.7
 * Every python module in "requirements.txt"
 
+## Package Requirements
+```python-dev libmysqlclient-dev libsasl2-dev python-dev libldap2-dev libssl-dev```
+
 ## Installation
 * Clone this repository
 * Edit `config.py` to fit your deployment
+* Run `pip install -r requirements.txt`p
 * Run `python ./setup.py`
 
 ## How to use

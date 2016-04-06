@@ -1,0 +1,8 @@
+import os
+_basedir = os.path.abspath(os.path.dirname(__file__))
+
+config = {
+	'DATABASE_URI': 'sqlite:///' + os.path.join(_basedir, 'app.db'),
+	'TEAM_MIN_NUM': 1,
+	'TEAM_MAX_NUM': 11
+}
