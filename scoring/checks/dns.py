@@ -32,8 +32,16 @@ def check_dns(check, data):
 		check.addOutput("Querying %s for '%s'..." % (data["HOST"], data["LOOKUP"]))
 		lookup = resolv.query(data["LOOKUP"], data["TYPE"])
 
-		if data["EXPECTED"] not in lookup:
+		found = False
+		for ans in lookup:
+			if str(ans) == data["EXPECTED"]:
+				found = True
+			else:
+				check.addOutput("NOTICE: DNS Server returned %" % (ans))
+
+		if not found:
 			check.addOutput("ERROR: DNS Server did not respond with the correct IP")
+			return
 
 		# We're good!
 		check.setPassed()
