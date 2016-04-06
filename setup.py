@@ -69,8 +69,10 @@ try:
 		# MySQL
 		session.add_all([
 			TeamService(teams[i], service_mysql, "HOST", "10.%d.2.75" % (i), order=0),
-			TeamService(teams[i], service_mysql, "PORT", "3306", order=2),
-			TeamService(teams[i], service_mysql, "DB_LOOKUP", "obm", edit=False, order=3),
+			TeamService(teams[i], service_mysql, "PORT", "3306", order=1),
+			TeamService(teams[i], service_mysql, "USER", "root", order=2),
+			TeamService(teams[i], service_mysql, "PASS", "changeme", order=3),
+			TeamService(teams[i], service_mysql, "DB_LOOKUP", "obm", edit=False, order=4),
 		])
 
 		# FTP
