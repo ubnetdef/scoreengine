@@ -1,2 +1,44 @@
+from __future__ import absolute_import
+from config import config
+from dns.resolver import Resolver
+
+# DEFAULTS
+dns_config = {
+	'timeout': 5.0,
+	'lifetime': 5.0
+}
+# /DEFAULTS
+
+# CONFIG
+if "dns" in config:
+	dns_config.update(config["dns"])
+# /CONFIG
+
 def check_dns(check, data):
-	check.addOutput("check_dns, yo")
+	check.addOutput("ScoreEngine: %s Check\n" % (check.getServiceName()))
+	check.addOutput("EXPECTED: Sucessful and correct query against the DNS server")
+	check.addOutput("OUTPUT:\n")
+
+	# Setup the resolver
+	resolv = Resolver()
+	resolv.nameservers = [data["HOST"]]
+	resolv.timeout = dns_config["timeout"]
+	resolv.lifetime = dns_config["lifetime"]
+
+	check.addOutput("Starting check...")
+
+	try:
+		# Query resolver
+		check.addOutput("Querying %s for '%s'..." % (data["HOST"], data["LOOKUP"]))
+		lookup = resolv.query(data["LOOKUP"], data["TYPE"])
+
+		if data["EXPECTED"] not in lookup:
+			check.addOutput("ERROR: DNS Server did not respond with the correct IP")
+
+		# We're good!
+		check.setPassed()
+		check.addOutput("Check sucessful!")
+	except Exception as e:
+		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
+
+		return

@@ -4,6 +4,7 @@ from datetime import datetime
 from time import sleep
 from thread import start_new_thread, allocate_lock
 import random
+import importlib
 
 """
 ScoringEngine
@@ -104,8 +105,8 @@ class Check(object):
 		self.getCheck()(self, checkData)
 
 	def getCheck(self):
-		group = __import__('scoring.checks.%s' % (self.service["group"]), globals(), locals(), [self.service["check"]])
-		
+		group = importlib.import_module('scoring.checks.%s' % (self.service["group"]))
+
 		return getattr(group, self.service["check"])
 
 	def addOutput(self, message):

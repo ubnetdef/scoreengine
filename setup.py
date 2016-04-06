@@ -45,7 +45,8 @@ try:
 		session.add_all([
 			TeamService(teams[i], service_dns, "HOST", "10.%d.1.10" % (i), order=0),
 			TeamService(teams[i], service_dns, "LOOKUP", "ad.obm%02d.open" % (i), edit=False, order=1),
-			TeamService(teams[i], service_dns, "EXPECTED", "10.%d.1.10" % (i), edit=False, order=2)
+			TeamService(teams[i], service_dns, "TYPE", "A", edit=False, order=2),
+			TeamService(teams[i], service_dns, "EXPECTED", "10.%d.1.10" % (i), edit=False, order=3)
 		])
 
 		# AD

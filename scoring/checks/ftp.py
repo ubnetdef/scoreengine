@@ -75,7 +75,7 @@ def check_upload_download(check, data):
 		check.setPassed()
 		check.addOutput("Check sucessful!")
 	except Exception as e:
-		check.addOutput("ERROR: %s" % (e))
+		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
 
 		if ftp is not None:
 			ftp.quit()

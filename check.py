@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 from scoring import Session
 from scoring.master import Master
 from scoring.models import Team, Service

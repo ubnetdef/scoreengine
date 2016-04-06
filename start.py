@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from scoring.master import Master
 
 master = Master()

@@ -46,6 +46,6 @@ def check_query_server(check, data):
 		check.setPassed()
 		check.addOutput("Check sucessful!")
 	except Exception as e:
-		check.addOutput("ERROR: %s" % (e))
+		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
 
 		return
