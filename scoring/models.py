@@ -21,12 +21,14 @@ class Service(Base):
 
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(255), unique=True)
+	group = db.Column(db.String(255))
 	check = db.Column(db.String(255))
 	enabled = db.Column(db.Boolean)
 
-	def __init__(self, name, check, enabled=True):
+	def __init__(self, name, group, check, enabled=True):
 		self.name = name
 		self.check = check
+		self.group = group
 		self.enabled = enabled
 
 class TeamService(Base):
