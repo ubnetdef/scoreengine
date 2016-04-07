@@ -32,7 +32,7 @@ def check_upload_download(check, data):
 	# Size should be 2x randomBytes due to hexlify
 	randomBytes = choice(range(1000, 9000))
 	checkFile.write(hexlify(urandom(randomBytes)))
-	checkFile.flush()
+	checkFile.seek(0)
 
 	checkFileName = basename(checkFile.name)
 	checkFileSize = getsize(checkFile.name)
