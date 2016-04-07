@@ -59,7 +59,7 @@ def check_upload_download(check, data):
 		# Get the size of the file
 		check.addOutput("Getting size of %s...." % (checkFileName))
 		actualSize = ftp.size(checkFileName)
-		if int(actualSize) is not int(checkFileSize):
+		if actualSize != checkFileSize:
 			check.addOutput("File size is %d, not the same as source (%d)! Failure!" % (actualSize, checkFileSize))
 
 			ftp.close()

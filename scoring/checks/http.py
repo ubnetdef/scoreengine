@@ -52,7 +52,7 @@ def check_custom_lockdownv0(check, data):
 
 		magicText = matches.group(1).split("|")
 
-		if len(magicText) is not 3:
+		if len(magicText) != 3:
 			check.addOutput("Check failed on part 2!")
 			return
 
