@@ -53,7 +53,7 @@ def check_upload_download(check, data):
 
 		# Attempt to upload a file
 		check.addOutput("Uploading file %s with %d bytes..." % (checkFileName, checkFileSize))
-		ftp.storlines("STOR " + checkFileName, checkFile)
+		ftp.storbinary("STOR " + checkFileName, checkFile)
 		check.addOutput("Uploaded!")
 
 		# Get the size of the file
@@ -62,7 +62,7 @@ def check_upload_download(check, data):
 		if int(actualSize) is not int(checkFileSize):
 			check.addOutput("File size is %d, not the same as source (%d)! Failure!" % (actualSize, checkFileSize))
 
-			ftp.quit()
+			ftp.close()
 			return
 		else:
 			check.addOutput("File size check passed!")
