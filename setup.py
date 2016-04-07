@@ -56,7 +56,7 @@ try:
 			TeamService(teams[i], service_ad, "LOOKUP_USER", "ad\Administrator", edit=False, order=3),
 
 			# User's to use
-			TeamService(teams[i], service_ad, "USERPASS", "ad\mal||changeme", order=2)
+			TeamService(teams[i], service_ad, "USERPASS", "mal||changeme", order=2)
 		])
 
 		# HTTP
@@ -82,7 +82,7 @@ try:
 			TeamService(teams[i], service_ftp, "HOST", "10.%d.2.25" % (i), order=0),
 
 			# User's to use
-			TeamService(teams[i], service_ftp, "USERPASS", "ad\mal||changeme", order=1),
+			TeamService(teams[i], service_ftp, "USERPASS", "OBM%02d\mal||changeme" % (i), order=1),
 		])
 
 	# We're done! Commit (and hope it works..)
