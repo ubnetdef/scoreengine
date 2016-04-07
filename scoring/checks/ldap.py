@@ -25,7 +25,7 @@ def check_ldap_lookup(check, data):
 		l = ldap.initialize('ldap://%s' % data["HOST"])
 
 		# Bind to the user we're using to lookup
-		username = "uid=%s,ou=People,dc=%s,dc=open" % (data["USER"], data["DOMAIN"])
+		username = data["USER"]
 		password = data["PASS"]
 
 		l.protocol_version = ldap.VERSION3
