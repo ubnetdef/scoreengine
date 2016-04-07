@@ -26,7 +26,6 @@ try:
 	service_example = Service("Example", "example", "check_example")
 	
 	session.add_all([
-		service_example,
 		service_imcp, service_dns, service_ad,
 		service_http, service_mysql, service_ftp
 	])
