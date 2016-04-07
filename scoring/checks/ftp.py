@@ -1,6 +1,7 @@
 from binascii import hexlify
 from config import config
 from ftplib import FTP
+from os.path import basename
 from os import urandom
 from os.path import getsize
 from random import choice
@@ -32,6 +33,7 @@ def check_upload_download(check, data):
 	checkFile.write(hexlify(urandom(randomBytes)))
 	checkFile.flush()
 
+	checkFileName = basename(checkFile.name)
 	checkFileSize = getsize(checkFile.name)
 	ftp = None
 
@@ -49,13 +51,13 @@ def check_upload_download(check, data):
 		check.addOutput("Authentication sucessful!")
 
 		# Attempt to upload a file
-		check.addOutput("Uploading file %s with %d bytes..." % (checkFile.name, checkFileSize))
-		ftp.storlines("STOR " + checkFile.name, checkFile)
+		check.addOutput("Uploading file %s with %d bytes..." % (checkFileName, checkFileSize))
+		ftp.storlines("STOR " + checkFileName, checkFile)
 		check.addOutput("Uploaded!")
 
 		# Get the size of the file
-		check.addOutput("Getting size of %s...." % (checkFile.name))
-		actualSize = ftp.size(checkFile.name)
+		check.addOutput("Getting size of %s...." % (checkFileNamename))
+		actualSize = ftp.size(checkFileName)
 		if actualSize is not checkFileSize:
 			check.addOutput("File size is %d, not the same as source (%d)! Failure!" % (actualSize, checkFileSize))
 
@@ -65,8 +67,8 @@ def check_upload_download(check, data):
 			check.addOutput("File size check passed!")
 
 		# Delete it
-		check.addOutput("Deleting file %s..." % (checkFile.name))
-		ftp.delete(checkFile.name)
+		check.addOutput("Deleting file %s..." % (checkFileName))
+		ftp.delete(checkFileName)
 		check.addOutput("Deleted!")
 
 		# Passed!
