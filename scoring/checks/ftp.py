@@ -10,7 +10,8 @@ from tempfile import NamedTemporaryFile
 # DEFAULTS
 ftp_config = {
 	'timeout': 5,
-	'prefix': 'scoreengine_'
+	'prefix': 'scoreengine_',
+	'bufsize': 0
 }
 # /DEFAULTS
 
@@ -25,7 +26,7 @@ def check_upload_download(check, data):
 	check.addOutput("OUTPUT:\n")
 
 	# Create a temp file
-	checkFile = NamedTemporaryFile(prefix=ftp_config["prefix"])
+	checkFile = NamedTemporaryFile(prefix=ftp_config["prefix"], bufsize=ftp_config["bufsize"])
 
 	# Write random amount of bytes to the checkFile
 	# Size should be 2x randomBytes due to hexlify
