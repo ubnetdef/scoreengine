@@ -33,4 +33,4 @@ service = {
 }
 
 master = Master()
-master.new_check(team, service)
+master.new_check(team, service, dryRun=True)
