@@ -73,7 +73,7 @@ def check_upload_download(check, data):
 		check.addOutput("Deleted!")
 
 		# Passed!
-		ftp.quit()
+		ftp.close()
 
 		check.setPassed()
 		check.addOutput("Check successful!")
@@ -81,6 +81,6 @@ def check_upload_download(check, data):
 		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
 
 		if ftp is not None:
-			ftp.quit()
+			ftp.close()
 
 		return
