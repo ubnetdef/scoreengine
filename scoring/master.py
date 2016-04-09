@@ -1,9 +1,11 @@
+from config import config
 from scoring import Session
 from scoring.models import Team, Service, TeamService, Check
 from datetime import datetime
 from time import sleep
 from thread import start_new_thread, allocate_lock
 import random
+import requests
 import importlib
 
 """
@@ -79,6 +81,9 @@ class Master(object):
 			self.printLock.acquire()
 			print "Round: %04d | %s | Service: %s | Passed: %r" % (self.round, team["name"].ljust(8), service["name"].ljust(10), check.getPassed())
 			self.printLock.release()
+
+			# Tell the Bank API to give some money
+			r = requests.post("http://%s/internalGiveMoney" % (config["BANK_SERVER"]), data={'username': config["BANK_USER"], 'password': config["BANK_PASS"], 'team': team["id"]})
 
 class ServiceCheck(object):
 	def __init__(self, team, service, session):
