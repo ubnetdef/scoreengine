@@ -25,7 +25,7 @@ class Master(object):
 	def run(self):
 		while True:
 			self.round += 1
-			start_new_thread(self.new_round, (self.round))
+			start_new_thread(self.new_round, (self.round,))
 
 			sleep(60)
 
