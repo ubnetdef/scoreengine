@@ -69,9 +69,10 @@ def check_custom_lockdownv0(check, data):
 			check.addOutput("Check failed on part 3!")
 			return
 
-		if actualTime < reqStart - timedelta(seconds=http_config["lockdownv0_lateness"]):
-			check.addOutput("Check failed on part 4!")
-			return
+		# Disabling this due to NTP issues on the linux boxes
+		#if actualTime < reqStart - timedelta(seconds=http_config["lockdownv0_lateness"]):
+		#	check.addOutput("Check failed on part 4!")
+		#	return
 
 		if actualHash != expectedHash:
 			check.addOutput("Check failed on part 5!")
