@@ -66,13 +66,15 @@ class Check(Base):
 	service_id = db.Column(db.Integer, db.ForeignKey('services.id'))
 	service = relationship('Service')
 
+	round = db.Column(db.Integer)
 	time = db.Column(db.DateTime)
 	passed = db.Column(db.Boolean)
 	output = db.Column(db.Text)
 
-	def __init__(self, team, service, passed, output):
+	def __init__(self, team, service, round, passed, output):
 		self.team_id = team
 		self.service_id = service
+		self.round = round
 		self.passed = passed
 		self.output = output
 		self.time = datetime.utcnow()

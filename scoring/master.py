@@ -25,11 +25,11 @@ class Master(object):
 	def run(self):
 		while True:
 			self.round += 1
-			start_new_thread(self.new_round, ())
+			start_new_thread(self.new_round, (self.round))
 
 			sleep(60)
 
-	def new_round(self):
+	def new_round(self, round):
 		# Make a new session for this thread
 		session = Session()
 
@@ -57,9 +57,9 @@ class Master(object):
 		# Start the checks!
 		for team in teams:
 			for service in services:
-				start_new_thread(self.new_check, (team, service))
+				start_new_thread(self.new_check, (team, service, round))
 
-	def new_check(self, team, service, dryRun=False):
+	def new_check(self, team, service, round, dryRun=False):
 		check = ServiceCheck(team, service, Session())
 
 		check.run()
@@ -73,7 +73,7 @@ class Master(object):
 			self.printLock.release()
 		else:
 			session = Session()
-			session.add(Check(team["id"], service["id"], check.getPassed(), "\n".join(check.getOutput())))
+			session.add(Check(team["id"], service["id"], round, check.getPassed(), "\n".join(check.getOutput())))
 			session.commit()
 			session.close()
 
