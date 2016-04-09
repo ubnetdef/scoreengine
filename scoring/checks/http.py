@@ -11,7 +11,7 @@ import re
 http_config = {
 	'timeout': 5,
 	'lockdownv0_random_bytes': 20,
-	'lockdownv0_lateness': 10
+	'lockdownv0_lateness': 30
 }
 # /DEFAULTS
 
@@ -36,6 +36,9 @@ def check_custom_lockdownv0(check, data):
 	check.addOutput("Starting check...")
 
 	try:
+		# Time the start of the request
+		reqStart = datetime.now()
+
 		# Connect to the website
 		check.addOutput("Connecting to http://%s:%s" % (data["HOST"], data["PORT"]))
 		session = requests.Session()
@@ -66,7 +69,7 @@ def check_custom_lockdownv0(check, data):
 			check.addOutput("Check failed on part 3!")
 			return
 
-		if actualTime < datetime.now() - timedelta(seconds=http_config["lockdownv0_lateness"]):
+		if actualTime < reqStart - timedelta(seconds=http_config["lockdownv0_lateness"]):
 			check.addOutput("Check failed on part 4!")
 			return
 
