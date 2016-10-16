@@ -83,8 +83,8 @@ class Master(object):
 			self.printLock.release()
 
 			# Tell the Bank API to give some money
-			if check.getPassed():
-				r = requests.post("http://%s/internalGiveMoney" % (config["BANK_SERVER"]), data={'username': config["BANK_USER"], 'password': config["BANK_PASS"], 'team': team["id"]})
+			#if check.getPassed():
+			#	r = requests.post("http://%s/internalGiveMoney" % (config["BANK_SERVER"]), data={'username': config["BANK_USER"], 'password': config["BANK_PASS"], 'team': team["id"]})
 
 class ServiceCheck(object):
 	def __init__(self, team, service, session):
