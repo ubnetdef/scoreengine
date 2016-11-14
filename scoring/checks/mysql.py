@@ -3,7 +3,9 @@ import MySQLdb
 
 # DEFAULTS
 mysql_config = {
-	'timeout': 5
+	'timeout': 5,
+	'min_tables_count': 0,
+	'max_tables_count': -1,
 }
 # /DEFAULTS
 
@@ -38,9 +40,14 @@ def check_query_server(check, data):
 		cur.execute("SHOW tables;")
 
 		# Verify tables
-		if cur.rowcount < 0:
-			check.addOutput("ERROR: Nothing returned. Check your users permissions.")
+		if cur.rowcount < mysql_config["min_tables_count"]:
+			check.addOutput("ERROR: The table count returned is incorrect.")
 			return
+
+		if mysql_config["max_tables_count"] > 0:
+			if cur.rowcount > mysql_config["max_tables_count"]:
+				check.addOutput("ERROR: The table count returned is incorrect.")
+				return
 
 		# We're done
 		check.setPassed()
