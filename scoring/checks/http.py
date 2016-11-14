@@ -20,6 +20,30 @@ if "http" in config:
 	http_config.update(config["http"])
 # /CONFIG
 
+def check_http(check, data):
+	check.addOutput("ScoreEngine: %s Check\n" % (check.getServiceName()))
+	check.addOutput("EXPECTED: Website is online")
+	check.addOutput("OUTPUT:\n")
+	check.addOutput("Starting check...")
+
+	try:
+		# Time the start of the request
+		reqStart = datetime.now()
+
+		# Connect to the website
+		check.addOutput("Connecting to http://%s:%s" % (data["HOST"], data["PORT"]))
+		session = requests.Session()
+		req = session.get("http://%s:%s" % (data["HOST"], data["PORT"]), timeout=http_config["timeout"])
+		check.addOutput("Connected!")
+
+		# It passed all our check
+		check.setPassed()
+		check.addOutput("Check successful!")
+	except Exception as e:
+		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
+
+	return
+
 def check_custom_lockdownv0(check, data):
 	check.addOutput("ScoreEngine: %s Check\n" % (check.getServiceName()))
 	check.addOutput("EXPECTED: Sucessful logging in of a user")

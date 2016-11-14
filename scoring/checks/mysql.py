@@ -34,12 +34,12 @@ def check_query_server(check, data):
 		cur = db.cursor()
 
 		# Attempt a show tables
-		check.addOutput("Attempting to select all users...")
-		cur.execute("SELECT * FROM users")
+		check.addOutput("Attempting to describe all tables...")
+		cur.execute("SHOW tables;")
 
 		# Verify tables
 		if cur.rowcount < 0:
-			check.addOutput("ERROR: Nothing returned. Check your users table.")
+			check.addOutput("ERROR: Nothing returned. Check your users permissions.")
 			return
 
 		# We're done
