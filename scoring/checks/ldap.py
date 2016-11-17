@@ -25,12 +25,15 @@ def check_ldap_lookup(check, data):
 		l = ldap.initialize('ldap://%s' % data["HOST"])
 
 		# Bind to the user we're using to lookup
+		domain = data["DOMAIN"]
 		username = data["USER"]
 		password = data["PASS"]
 
+		actual_username = "%s\%s" % (domain, username)
+
 		l.protocol_version = ldap.VERSION3
 		l.set_option(ldap.OPT_NETWORK_TIMEOUT, ldap_config["timeout"])
-		l.simple_bind_s(username, password)
+		l.simple_bind_s(actual_username, password)
 
 		# We're good!
 		check.setPassed()
