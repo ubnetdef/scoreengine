@@ -4,5 +4,20 @@ _basedir = os.path.abspath(os.path.dirname(__file__))
 config = {
 	'DATABASE_URI': 'sqlite:///' + os.path.join(_basedir, 'app.db'),
 	'TEAM_MIN_NUM': 1,
-	'TEAM_MAX_NUM': 11
+	'TEAM_MAX_NUM': 11,
+
+	'BANK_SERVER': 'x.x.x.x',
+	'BANK_USER': 'x',
+	'BANK_PASS': 'x',
+
+	'INTERFACE': 'eth0',
+	'POSSIBLE_IPS': [
+		'x.x.x.x',
+		'x.x.x.x'
+	]
+}
+
+# Scoring config - IMCP
+config['imcp'] = {
+	'timeout': 5
 }

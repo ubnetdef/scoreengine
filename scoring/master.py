@@ -7,6 +7,7 @@ from thread import start_new_thread, allocate_lock
 import random
 import requests
 import importlib
+import os
 
 """
 ScoringEngine
@@ -25,6 +26,12 @@ class Master(object):
 	def run(self):
 		while True:
 			self.round += 1
+
+			# SUPER HACKING, WOAH
+			os.system("ifconfig %s down" % (config["INTERFACE"]))
+			os.system("ifconfig %s %s" % (config["INTERFACE"], random.choice(config["POSSIBLE_IPS"])))
+			os.system("ifconfig %s up" % (config["INTERFACE"]))
+
 			start_new_thread(self.new_round, (self.round,))
 
 			sleep(60)
@@ -83,8 +90,8 @@ class Master(object):
 			self.printLock.release()
 
 			# Tell the Bank API to give some money
-			#if check.getPassed():
-			#	r = requests.post("http://%s/internalGiveMoney" % (config["BANK_SERVER"]), data={'username': config["BANK_USER"], 'password': config["BANK_PASS"], 'team': team["id"]})
+			if check.getPassed():
+				r = requests.post("http://%s/internalGiveMoney" % (config["BANK_SERVER"]), data={'username': config["BANK_USER"], 'password': config["BANK_PASS"], 'team': team["id"]})
 
 class ServiceCheck(object):
 	def __init__(self, team, service, session):
