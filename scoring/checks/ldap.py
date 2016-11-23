@@ -29,7 +29,7 @@ def check_ldap_lookup(check, data):
 		username = data["USER"]
 		password = data["PASS"]
 
-		actual_username = "%s\%s" % (domain, username)
+		actual_username = "%s@%s" % (username, domain)
 
 		l.protocol_version = ldap.VERSION3
 		l.set_option(ldap.OPT_NETWORK_TIMEOUT, ldap_config["timeout"])

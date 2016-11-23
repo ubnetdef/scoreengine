@@ -16,63 +16,44 @@ try:
 		session.add(teams[i])
 
 	# Create our services
-	service_imcp = Service("IMCP", "imcp", "check_imcp")
-	service_dns = Service("DNS", "dns", "check_dns")
+	service_imcp1 = Service("ICMP (1)", "imcp", "check_imcp")
+	service_imcp2 = Service("ICMP (2)", "imcp", "check_imcp")
 	service_ad = Service("AD", "ldap", "check_ldap_lookup")
-	service_http = Service("HTTP", "http", "check_custom_lockdownv0")
-	service_mysql = Service("MySQL", "mysql", "check_query_server")
+	service_http = Service("HTTP", "http", "check_custom_lockdownv1")
 	service_ftp = Service("FTP", "ftp", "check_upload_download")
-
-	service_example = Service("Example", "example", "check_example")
+	service_imap = Service("IMAP", "imap", "check_imap_login")
 	
 	session.add_all([
-		service_imcp, service_dns, service_ad,
-		service_http, service_mysql, service_ftp
+		service_imcp1, service_imcp2, service_ad,
+		service_http, service_ftp, service_imap
 	])
 
 	# Assign services to each team
 	for i in range(config['TEAM_MIN_NUM'], config['TEAM_MAX_NUM']):
 		# ICMP
 		session.add_all([
-			TeamService(teams[i], service_imcp, "IP", "10.%d.1.101" % (i), edit=False),
-			TeamService(teams[i], service_imcp, "IP", "10.%d.1.102" % (i), edit=False),
-			TeamService(teams[i], service_imcp, "IP", "10.%d.1.201" % (i), edit=False),
-			TeamService(teams[i], service_imcp, "IP", "10.%d.1.202" % (i), edit=False)
-		])
-
-		# DNS
-		session.add_all([
-			TeamService(teams[i], service_dns, "HOST", "10.%d.1.10" % (i), order=0),
-			TeamService(teams[i], service_dns, "LOOKUP", "ad.obm%02d.open" % (i), edit=False, order=1),
-			TeamService(teams[i], service_dns, "TYPE", "A", edit=False, order=2),
-			TeamService(teams[i], service_dns, "EXPECTED", "10.%d.1.10" % (i), edit=False, order=3)
+			TeamService(teams[i], service_imcp1, "IP", "10.%d.1.15" % (i), edit=False),
+			TeamService(teams[i], service_imcp1, "IP", "10.%d.1.25" % (i), edit=False),
+			TeamService(teams[i], service_imcp2, "IP", "10.%d.1.67" % (i), edit=False),
+			TeamService(teams[i], service_imcp2, "IP", "10.%d.1.77" % (i), edit=False)
 		])
 
 		# AD
 		session.add_all([
-			TeamService(teams[i], service_ad, "HOST", "10.%d.1.10" % (i), order=0),
-			TeamService(teams[i], service_ad, "LOOKUP_USER", "ad\Administrator", edit=False, order=2),
+			TeamService(teams[i], service_ad, "HOST", "10.%d.1.99" % (i), order=0),
+			TeamService(teams[i], service_ad, "LOOKUP_USER", "ad\Administrator", edit=False, order=3),
+			TeamService(teams[i], service_ad, "DOMAIN", "catflix%02d.cat" % (i), edit=False, order=1),
 
 			# User's to use
-			TeamService(teams[i], service_ad, "USERPASS", "OBM%02d\mal||changeme" % (i), order=1)
+			TeamService(teams[i], service_ad, "USERPASS", "jgeist||Changeme!", order=2),
+			TeamService(teams[i], service_ad, "USERPASS", "jdroste||ego123!", order=2),
 		])
 
 		# HTTP
 		session.add_all([
-			TeamService(teams[i], service_http, "HOST", "10.%d.2.50" % (i), order=0),
+			TeamService(teams[i], service_http, "HOST", "10.%d.2.15" % (i), order=0),
 			TeamService(teams[i], service_http, "PORT", "80", order=1),
-
-			# User's to use
-			TeamService(teams[i], service_http, "USERPASS", "admin||changeme", order=2),
-		])
-
-		# MySQL
-		session.add_all([
-			TeamService(teams[i], service_mysql, "HOST", "10.%d.2.75" % (i), order=0),
-			TeamService(teams[i], service_mysql, "PORT", "3306", order=1),
-			TeamService(teams[i], service_mysql, "USER", "root", order=2),
-			TeamService(teams[i], service_mysql, "PASS", "changeme", order=3),
-			TeamService(teams[i], service_mysql, "DB_LOOKUP", "obm", edit=False, order=4),
+			TeamService(teams[i], service_http, "PORT2", "32400", order=2),
 		])
 
 		# FTP
@@ -80,7 +61,16 @@ try:
 			TeamService(teams[i], service_ftp, "HOST", "10.%d.2.25" % (i), order=0),
 
 			# User's to use
-			TeamService(teams[i], service_ftp, "USERPASS", "OBM%02d\mal||changeme" % (i), order=1),
+			TeamService(teams[i], service_ftp, "USERPASS", "plex||changeme", order=1),
+		])
+
+		# IMAP
+		session.add_all([
+			TeamService(teams[i], service_imap, "HOST", "10.%d.2.99" % (i), order=0),
+			TeamService(teams[i], service_imap, "PORT", "587", order=1),
+
+			# User's to use
+			TeamService(teams[i], service_imap, "USERPASS", "kcleary@catflix%02d.cat||cats4cats" % (i), order=2)
 		])
 
 	# We're done! Commit (and hope it works..)

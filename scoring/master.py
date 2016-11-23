@@ -18,7 +18,7 @@ at specific intervals
 class Master(object):
 	def __init__(self):
 		self.started = datetime.utcnow()
-		self.round = 0
+		self.round = 324
 
 		self.printLock = allocate_lock()
 		self.session = Session()
@@ -28,9 +28,18 @@ class Master(object):
 			self.round += 1
 
 			# SUPER HACKING, WOAH
-			os.system("ifconfig %s down" % (config["INTERFACE"]))
-			os.system("ifconfig %s %s" % (config["INTERFACE"], random.choice(config["POSSIBLE_IPS"])))
-			os.system("ifconfig %s up" % (config["INTERFACE"]))
+			if random.random() > 1.2:
+				new_ip = random.choice(config["POSSIBLE_IPS"])
+
+				os.system("ifconfig %s down" % (config["INTERFACE"]))
+#				os.system("route del default")
+				os.system("ifconfig %s %s netmask 255.255.240.0" % (config["INTERFACE"], new_ip))
+#				os.system("route add default gw %s" % (config["GATEWAY"]))
+				os.system("ifconfig %s up" % (config["INTERFACE"]))
+
+				self.printLock.acquire()
+				print "Changed IP: %s" % (new_ip)
+				self.printLock.release()
 
 			start_new_thread(self.new_round, (self.round,))
 
