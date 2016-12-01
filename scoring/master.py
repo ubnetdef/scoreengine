@@ -18,7 +18,7 @@ at specific intervals
 class Master(object):
 	def __init__(self):
 		self.started = datetime.utcnow()
-		self.round = 324
+		self.round = 0
 
 		self.printLock = allocate_lock()
 		self.session = Session()
