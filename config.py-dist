@@ -9,12 +9,6 @@ config = {
 	'BANK_SERVER': 'x.x.x.x',
 	'BANK_USER': 'x',
 	'BANK_PASS': 'x',
-
-	'INTERFACE': 'eth0',
-	'POSSIBLE_IPS': [
-		'x.x.x.x',
-		'x.x.x.x'
-	]
 }
 
 # Scoring config - IMCP

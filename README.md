@@ -10,8 +10,9 @@ Scoring Engine used for UBNETDEF's [Lockdown](https://lockdown.ubnetdef.org) Com
 
 ## Installation
 * Clone this repository
+* Copy `config.py-dist` to `config.py`
 * Edit `config.py` to fit your deployment
-* Run `pip install -r requirements.txt`p
+* Run `pip install -r requirements.txt`
 * Run `python ./setup.py`
 
 ## How to use
