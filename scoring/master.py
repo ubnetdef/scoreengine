@@ -62,7 +62,7 @@ class Master(object):
 				start_new_thread(self.new_check, (team, service, round))
 
 	def new_check(self, team, service, round, dryRun=False):
-		check = ServiceCheck(team, service, Session())
+		check = ServiceCheck(team, service)
 
 		check.run()
 
@@ -89,20 +89,21 @@ class Master(object):
 				r = requests.post("http://%s/internalGiveMoney" % (config["BANK_SERVER"]), data={'username': config["BANK_USER"], 'password': config["BANK_PASS"], 'team': team["id"]})
 
 class ServiceCheck(object):
-	def __init__(self, team, service, session):
+	def __init__(self, team, service):
 		self.team = team
 		self.service = service
-		self.session = session
 
 		self.passed = False
 		self.output = []
 
 	def run(self):
 		# Get all the service data for this check
-		checkDataDB = self.session.query(TeamService)\
+		session = Session()
+		checkDataDB = session.query(TeamService)\
 					.filter(TeamService.team_id == self.team["id"])\
 					.filter(TeamService.service_id == self.service["id"])\
 					.order_by(TeamService.order)
+		session.close()
 
 		checkDataInitial = {}
 		
@@ -127,9 +128,6 @@ class ServiceCheck(object):
 
 		# Call it!
 		self.getCheck()(self, checkData)
-
-		# Close the session
-		self.session.close()
 
 	def getCheck(self):
 		group = importlib.import_module('scoring.checks.%s' % (self.service["group"]))
