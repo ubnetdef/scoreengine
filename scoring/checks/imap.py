@@ -1,7 +1,9 @@
 from config import config
+import imaplib
 import requests
 import re
-import smtplib
+import socket
+
 
 # DEFAULTS
 imap_config = {
@@ -12,6 +14,8 @@ imap_config = {
 # CONFIG
 if "imap" in config:
 	imap_config.update(config["imap"])
+
+socket.setdefaulttimeout(imap_config["timeout"])
 # /CONFIG
 
 def check_imap_login(check, data):
@@ -22,14 +26,11 @@ def check_imap_login(check, data):
 
 	try:
 		check.addOutput("Connecting to %s:%s..." % (data["HOST"], data["PORT"]))
-		smtpObj = smtplib.SMTP(data["HOST"], data["PORT"])
+		imapObj = imaplib.IMAP4(data["HOST"], data["PORT"])
 		check.addOutput("Connected!")
 
-		smtpObj.ehlo()
-		smtpObj.starttls()
-
 		check.addOutput("Logging in as %s..." % (data["USER"]))
-		smtpObj.login(data["USER"], data["PASS"])
+		imapObj.login(data["USER"], data["PASS"])
 		check.addOutput("Logged in!")
 
 		# It passed all our check
