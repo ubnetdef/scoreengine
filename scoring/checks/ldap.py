@@ -5,7 +5,7 @@ import ldap
 
 # DEFAULTS
 ldap_config = {
-	'timeout': 5
+	'timeout': 15,
 }
 # /DEFAULTS
 

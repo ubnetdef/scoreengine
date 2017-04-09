@@ -3,7 +3,7 @@ import MySQLdb
 
 # DEFAULTS
 mysql_config = {
-	'timeout': 5,
+	'timeout': 15,
 	'min_tables_count': 0,
 	'max_tables_count': -1,
 }

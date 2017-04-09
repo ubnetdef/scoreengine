@@ -3,7 +3,7 @@ import config
 
 # DEFAULTS
 icmp_config = {
-	'timeout': 5,
+	'timeout': 10,
 	'command': "ping"
 }
 # /DEFAULTS

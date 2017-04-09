@@ -9,7 +9,7 @@ import re
 
 # DEFAULTS
 http_config = {
-	'timeout': 5,
+	'timeout': 15,
 
 	'wordpress_login': 'wp-login.php',
 	'wordpress_cookie': 'wordpress_logged_in_',

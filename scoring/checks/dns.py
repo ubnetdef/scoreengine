@@ -4,8 +4,8 @@ from dns.resolver import Resolver
 
 # DEFAULTS
 dns_config = {
-	'timeout': 5.0,
-	'lifetime': 5.0
+	'timeout': 15,
+	'lifetime': 15,
 }
 # /DEFAULTS
 

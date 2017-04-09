@@ -7,7 +7,7 @@ import socket
 
 # DEFAULTS
 imap_config = {
-	'timeout': 5,
+	'timeout': 15,
 }
 # /DEFAULTS
 
