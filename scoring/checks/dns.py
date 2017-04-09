@@ -29,7 +29,7 @@ def check_dns(check, data):
 
 	try:
 		# Query resolver
-		check.addOutput("Querying {} for '{}'...".format(data["HOST"], data["LOOKUP"]))
+		check.addOutput("Querying {HOST} for '{LOOKUP}'...".format(**data))
 		lookup = resolv.query(data["LOOKUP"], data["TYPE"])
 
 		found = False

@@ -42,12 +42,12 @@ def check_upload_download(check, data):
 
 	try:
 		# Start the connection
-		check.addOutput("Connecting to {}...".format(data["HOST"]))
+		check.addOutput("Connecting to {HOST}...".format(**data))
 		ftp = FTP(data["HOST"], timeout=ftp_config["timeout"])
 		check.addOutput("Connected!")
 
 		# Login
-		check.addOutput("Attempting to login as {} with password '{}'".format(data["USER"], data["PASS"]))
+		check.addOutput("Attempting to login as {USER} ".format(**data))
 		ftp.login(data["USER"], data["PASS"])
 		check.addOutput("Authentication sucessful!")
 
