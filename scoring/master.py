@@ -1,3 +1,4 @@
+from __future__ import print_function
 import config
 from scoring import Session
 from scoring.models import Team, Service, TeamService, Check
@@ -69,7 +70,7 @@ class Master(object):
 			self.printLock.acquire()
 			print "---------[ TEAM: %s | SERVICE: %s" % (team["name"], service["name"])
 			for line in check.getOutput():
-				print line
+				print(line)
 			print "---------[ PASSED: %r" % (check.getPassed())
 			self.printLock.release()
 		else:
@@ -80,7 +81,7 @@ class Master(object):
 
 			# Print out some data
 			self.printLock.acquire()
-			print "Round: %04d | %s | Service: %s | Passed: %r" % (self.round, team["name"].ljust(8), service["name"].ljust(15), check.getPassed())
+			print("Round: %04d | %s | Service: %s | Passed: %r" % (self.round, team["name"].ljust(8), service["name"].ljust(15), check.getPassed()))
 			self.printLock.release()
 
 			# Tell the Bank API to give some money
