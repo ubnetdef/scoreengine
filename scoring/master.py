@@ -16,12 +16,11 @@ Responsible for creating new CheckRound objects
 at specific intervals
 """
 class Master(object):
-	def __init__(self):
+	def __init__(self, round=0):
 		self.started = datetime.utcnow()
-		self.round = 0
+		self.round = round
 
 		self.printLock = allocate_lock()
-		self.session = Session()
 
 	def run(self):
 		while True:
@@ -81,11 +80,11 @@ class Master(object):
 
 			# Print out some data
 			self.printLock.acquire()
-			print "Round: %04d | %s | Service: %s | Passed: %r" % (self.round, team["name"].ljust(8), service["name"].ljust(10), check.getPassed())
+			print "Round: %04d | %s | Service: %s | Passed: %r" % (self.round, team["name"].ljust(8), service["name"].ljust(15), check.getPassed())
 			self.printLock.release()
 
 			# Tell the Bank API to give some money
-			if check.getPassed():
+			if check.getPassed() and config.BANK["ENABLED"]:
 				r = requests.post("http://%s/internalGiveMoney" % (config.BANK["SERVER"]), data={'username': config.BANK["USER"], 'password': config.BANK["PASS"], 'team': team["id"]})
 
 class ServiceCheck(object):

@@ -28,6 +28,7 @@ DATABASE_EXTRA = {
 }
 
 BANK = {
+	"ENABLED": False,
 	"SERVER": "localhost",
 	"USER": "username",
 	"PASS": "password"
