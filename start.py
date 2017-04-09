@@ -1,6 +1,8 @@
 import argparse
-from scoring import engine
+from celery.bin import worker as Worker
+from scoring import celery_app, engine
 from scoring.master import Master
+
 
 def main(args):
 	if args.reset:
@@ -12,8 +14,12 @@ def main(args):
 	if round > 0:
 		round -= 1
 
-	master = Master(round=round)
-	master.run()
+	if args.worker:
+		worker = Worker.worker(app=celery_app)
+		worker.run(loglevel='INFO', traceback=True)  # TODO: break this into config
+	else:
+		master = Master(round=round)
+		master.run()
 
 
 if __name__ == "__main__":
@@ -21,5 +27,7 @@ if __name__ == "__main__":
 
 	parser.add_argument('--reset', help='reset all existing checks', action='store_true', default=False)
 	parser.add_argument('--round', help='round to start at', type=int, default=0)
+
+	parser.add_argument('--worker', help='only handle checks from the task queue', action='store_true')
 
 	main(parser.parse_args())

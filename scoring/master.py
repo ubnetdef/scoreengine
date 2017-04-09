@@ -61,11 +61,12 @@ class Master(object):
 		# Start the checks!
 		for team in teams:
 			for service in services:
-				start_new_thread(self.new_check, (team, service, round))
+				#start_new_thread(self.new_check, (team, service, round))
+				self.new_check_task.delay(team, service, round)
 
 	@staticmethod
 	@celery_app.task
-	def new_check_queue(*args, **kwargs):
+	def new_check_task(*args, **kwargs):
 		return Master.new_check(*args, **kwargs)
 
 	@staticmethod
