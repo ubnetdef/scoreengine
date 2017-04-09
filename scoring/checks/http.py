@@ -11,7 +11,7 @@ import re
 http_config = {
 	'timeout': 5,
 
-	'wordpress_login': 'wp-login.php'
+	'wordpress_login': 'wp-login.php',
 
 	'lockdownv0_random_bytes': 20,
 	'lockdownv0_lateness': 30
