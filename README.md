@@ -6,7 +6,7 @@ Scoring Engine used for UBNETDEF's [Lockdown](https://lockdown.ubnetdef.org) Com
 * Every python module in "requirements.txt"
 
 ## Package Requirements
-```python-dev libmysqlclient-dev libsasl2-dev python-dev libldap2-dev libssl-dev```
+```python-dev libmysqlclient-dev libsasl2-dev python-dev libldap2-dev libssl-dev rabbitmq-server```
 
 ## Installation
 * Clone this repository
