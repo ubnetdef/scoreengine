@@ -10,6 +10,9 @@ import re
 # DEFAULTS
 http_config = {
 	'timeout': 5,
+
+	'wordpress_login': 'wp-login.php'
+
 	'lockdownv0_random_bytes': 20,
 	'lockdownv0_lateness': 30
 }
@@ -35,6 +38,46 @@ def check_http(check, data):
 		session = requests.Session()
 		req = session.get("http://%s:%s" % (data["HOST"], data["PORT"]), timeout=http_config["timeout"])
 		check.addOutput("Connected!")
+
+		# It passed all our check
+		check.setPassed()
+		check.addOutput("Check successful!")
+	except Exception as e:
+		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
+
+	return
+
+def check_wordpress(check, data):
+	check.addOutput("ScoreEngine: %s Check\n" % (check.getServiceName()))
+	check.addOutput("EXPECTED: Ability to use the wordpress website")
+	check.addOutput("OUTPUT:\n")
+	check.addOutput("Starting check...")
+
+	try:
+		# Time the start of the request
+		reqStart = datetime.now()
+
+		# Connect to the website
+		check.addOutput("Connecting to http://%s:%s" % (data["HOST"], data["PORT"]))
+		session = requests.Session()
+		req = session.get("http://%s:%s" % (data["HOST"], data["PORT"]), timeout=http_config["timeout"])
+		check.addOutput("Connected!")
+
+		# Load the login page
+		login_url = "http://%s:%s/%s" % (data["HOST"], data["PORT"], http_config["wordpress_login"])
+		login_payload = {
+			'log': data["USER"],
+			'pwd': data["PASS"]
+		}
+
+		check.addOutput("Loading login page")
+		req = session.get(login_url, timeout=http_config["timeout"])
+		check.addOutput("Loaded!")
+
+		# Attempt to login
+		check.addOutput("Attempting to login")
+		req = session.post(login_url, data=login_payload, timeout=http_config["timeout"])
+		check.addOutput("Logged in!")
 
 		# It passed all our check
 		check.setPassed()
