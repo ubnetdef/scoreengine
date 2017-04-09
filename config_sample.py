@@ -62,7 +62,7 @@ SERVICES = {
 	# Active Directory
 	"AD": _Service(
 		"ldap",
-		"check_ldap_loockup",
+		"check_ldap_lookup",
 		_Data("HOST", "10.%(team)d.1.50", order=0),
 		_Data("DOMAIN", "loribird%(team)d.win", edit=False, order=1),
 		_Data("USERPASS", "jgeistBird||Changeme123!", order=2),
