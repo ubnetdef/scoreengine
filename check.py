@@ -1,36 +1,46 @@
+from __future__ import print_function
+import argparse
 from scoring import Session
 from scoring.master import Master
 from scoring.models import Team, Service
 import sys
 
-if len(sys.argv) is not 3:
-	sys.exit("Usage: check [team-id] [service-id]")
+def main(args):
+	session = Session()
+	teamDB = session.query(Team).filter(Team.id == args.team).first()
 
-team_id = int(sys.argv[1])
-service_id = int(sys.argv[2])
+	if not teamDB:
+		print("ERROR: Unknown Team ID")
+		sys.exit(1)
 
-session = Session()
-teamDB = session.query(Team).filter(Team.id == team_id).first()
+	print("> Team: %s" % (teamDB.name))
+	team = {
+		'id': teamDB.id,
+		'name': teamDB.name
+	}
 
-if not teamDB:
-	sys.exit("ERROR: Unknown Team ID")
-print "> Team: %s" % (teamDB.name)
-team = {
-	'id': teamDB.id,
-	'name': teamDB.name
-}
+	serviceDB = session.query(Service).filter(Service.id == args.service).first()
 
-serviceDB = session.query(Service).filter(Service.id == service_id).first()
+	if not serviceDB:
+		print("ERROR: Unknown Service ID")
+		sys.exit(1)
 
-if not serviceDB:
-	sys.exit("ERROR: Unknown Service ID")
-print "> Service: %s" % (serviceDB.name)
-service = {
-	'id': serviceDB.id,
-	'name': serviceDB.name,
-	'group': serviceDB.group,
-	'check': serviceDB.check
-}
+	print("> Service: %s" % (serviceDB.name))
+	service = {
+		'id': serviceDB.id,
+		'name': serviceDB.name,
+		'group': serviceDB.group,
+		'check': serviceDB.check
+	}
 
-master = Master()
-master.new_check(team, service, 0, dryRun=True)
+	master = Master()
+	master.new_check(team, service, 0, dryRun=True)
+
+
+if __name__ == "__main__":
+	parser = argparse.ArgumentParser(description='ScoreEngine Simple Check')
+
+	parser.add_argument('team', type=int,help='team id')
+	parser.add_argument('service', type=int, help='service id')
+
+	main(parser.parse_args())
