@@ -22,7 +22,7 @@ if "http" in config.CHECKS:
 # /CONFIG
 
 def check_http(check, data):
-	check.addOutput("ScoreEngine: %s Check\n" % (check.getServiceName()))
+	check.addOutput("ScoreEngine: {} Check\n".format(check.getServiceName()))
 	check.addOutput("EXPECTED: Website is online")
 	check.addOutput("OUTPUT:\n")
 	check.addOutput("Starting check...")
@@ -32,12 +32,12 @@ def check_http(check, data):
 		reqStart = datetime.now()
 
 		# Connect to the website
-		check.addOutput("Connecting to http://%s:%s" % (data["HOST"], data["PORT"]))
+		check.addOutput("Connecting to http://{HOST}:{PORT}".format(**data))
 		session = requests.Session()
-		req = session.get("http://%s:%s" % (data["HOST"], data["PORT"]), timeout=http_config["timeout"])
+		req = session.get("http://{HOST}:{PORT}".format(**data), timeout=http_config["timeout"])
 
 		if req.status_code != 200:
-			check.addOutput("ERROR: Page returned status code %d" % (req.status_code))
+			check.addOutput("ERROR: Page returned status code {}".format(req.status_code))
 			return
 
 		check.addOutput("Connected!")
@@ -46,12 +46,12 @@ def check_http(check, data):
 		check.setPassed()
 		check.addOutput("Check successful!")
 	except Exception as e:
-		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
+		check.addOutput("ERROR: {}: {}".format(type(e).__name__, e))
 
 	return
 
 def check_wordpress(check, data):
-	check.addOutput("ScoreEngine: %s Check\n" % (check.getServiceName()))
+	check.addOutput("ScoreEngine: {} Check\n".format(check.getServiceName()))
 	check.addOutput("EXPECTED: Ability to use the wordpress website")
 	check.addOutput("OUTPUT:\n")
 	check.addOutput("Starting check...")
@@ -61,18 +61,18 @@ def check_wordpress(check, data):
 		reqStart = datetime.now()
 
 		# Connect to the website
-		check.addOutput("Connecting to http://%s:%s" % (data["HOST"], data["PORT"]))
+		check.addOutput("Connecting to http://{HOST}:{PORT}".format(**data))
 		session = requests.Session()
-		req = session.get("http://%s:%s" % (data["HOST"], data["PORT"]), timeout=http_config["timeout"])
+		req = session.get("http://{HOST}:{PORT}".format(**data), timeout=http_config["timeout"])
 
 		if req.status_code != 200:
-			check.addOutput("ERROR: Page returned status code %d" % (req.status_code))
+			check.addOutput("ERROR: Page returned status code {}".format(req.status_code))
 			return
 
 		check.addOutput("Connected!")
 
 		# Load the login page
-		login_url = "http://%s:%s/%s" % (data["HOST"], data["PORT"], http_config["wordpress_login"])
+		login_url = "http://{HOST}:{PORT}/{wordpress_login}".format(wordpress_login=http_config["wordpress_login"], **data)
 		login_payload = {
 			'log': data["USER"],
 			'pwd': data["PASS"]
@@ -82,7 +82,7 @@ def check_wordpress(check, data):
 		req = session.get(login_url, timeout=http_config["timeout"])
 
 		if req.status_code != 200:
-			check.addOutput("ERROR: Page returned status code %d" % (req.status_code))
+			check.addOutput("ERROR: Page returned status code {}".format(req.status_code))
 			return
 
 		check.addOutput("Loaded!")
@@ -92,7 +92,7 @@ def check_wordpress(check, data):
 		req = session.post(login_url, data=login_payload, timeout=http_config["timeout"])
 
 		if req.status_code != 200:
-			check.addOutput("ERROR: Page returned status code %d" % (req.status_code))
+			check.addOutput("ERROR: Page returned status code {}".format(req.status_code))
 			return
 
 		# Check the cookies
@@ -111,6 +111,6 @@ def check_wordpress(check, data):
 		check.setPassed()
 		check.addOutput("Check successful!")
 	except Exception as e:
-		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
+		check.addOutput("ERROR: {}: {}".format(type(e).__name__, e))
 
 	return

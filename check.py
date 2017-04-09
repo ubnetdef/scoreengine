@@ -13,7 +13,7 @@ def main(args):
 		print("ERROR: Unknown Team ID")
 		sys.exit(1)
 
-	print("> Team: %s" % (teamDB.name))
+	print("> Team: {}".format(teamDB.name))
 	team = {
 		'id': teamDB.id,
 		'name': teamDB.name
@@ -25,7 +25,7 @@ def main(args):
 		print("ERROR: Unknown Service ID")
 		sys.exit(1)
 
-	print("> Service: %s" % (serviceDB.name))
+	print("> Service: {}".format(serviceDB.name))
 	service = {
 		'id': serviceDB.id,
 		'name': serviceDB.name,
