@@ -61,6 +61,11 @@ def check_wordpress(check, data):
 		check.addOutput("Connecting to http://%s:%s" % (data["HOST"], data["PORT"]))
 		session = requests.Session()
 		req = session.get("http://%s:%s" % (data["HOST"], data["PORT"]), timeout=http_config["timeout"])
+
+		if req.status_code != 200:
+			check.addOutput("ERROR: Page returned status code %d" % (req.status_code))
+			return
+
 		check.addOutput("Connected!")
 
 		# Load the login page
@@ -72,11 +77,21 @@ def check_wordpress(check, data):
 
 		check.addOutput("Loading login page")
 		req = session.get(login_url, timeout=http_config["timeout"])
+
+		if req.status_code != 200:
+			check.addOutput("ERROR: Page returned status code %d" % (req.status_code))
+			return
+
 		check.addOutput("Loaded!")
 
 		# Attempt to login
 		check.addOutput("Attempting to login")
 		req = session.post(login_url, data=login_payload, timeout=http_config["timeout"])
+
+		if req.status_code != 200:
+			check.addOutput("ERROR: Page returned status code %d" % (req.status_code))
+			return
+
 		check.addOutput("Logged in!")
 
 		# It passed all our check
