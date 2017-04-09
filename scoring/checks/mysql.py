@@ -45,8 +45,8 @@ def check_wordpress(check, data):
 			check.addOutput("ERROR: Invalid data returned.")
 			return
 
-		data = cur.fetchone()
-		if data[0] != data["EXPECTED_BLOG_NAME"]:
+		db_data = cur.fetchone()
+		if db_data[0] != data["EXPECTED_BLOG_NAME"]:
 			check.addOutput("ERROR: Invalid data returned.")
 			return
 
