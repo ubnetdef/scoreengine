@@ -21,9 +21,10 @@ printLock = allocate_lock()
 
 
 class Master(object):
-	def __init__(self, round=0):
+	def __init__(self, round=0, only_queue=False):
 		self.started = datetime.utcnow()
 		self.round = round
+		self.only_queue = only_queue
 
 	def run(self):
 		while True:
@@ -61,8 +62,11 @@ class Master(object):
 		# Start the checks!
 		for team in teams:
 			for service in services:
-				#start_new_thread(self.new_check, (team, service, round))
-				self.new_check_task.delay(team, service, round)
+				if self.only_queue:
+					self.new_check_task.delay(team, service, round)
+				else:
+					start_new_thread(self.new_check, (team, service, round))
+
 
 	@staticmethod
 	@celery_app.task
