@@ -12,7 +12,7 @@ http_config = {
 	'timeout': 5,
 
 	'wordpress_login': 'wp-login.php',
-	'wordpress_logged_in': 'wordpress_logged_in_',
+	'wordpress_cookie': 'wordpress_logged_in_',
 
 	'lockdownv0_random_bytes': 20,
 	'lockdownv0_lateness': 30
