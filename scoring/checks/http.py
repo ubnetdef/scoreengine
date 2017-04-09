@@ -12,6 +12,7 @@ http_config = {
 	'timeout': 5,
 
 	'wordpress_login': 'wp-login.php',
+	'wordpress_logged_in': 'wordpress_logged_in_',
 
 	'lockdownv0_random_bytes': 20,
 	'lockdownv0_lateness': 30
@@ -90,6 +91,16 @@ def check_wordpress(check, data):
 
 		if req.status_code != 200:
 			check.addOutput("ERROR: Page returned status code %d" % (req.status_code))
+			return
+
+		# Check the cookies
+		has_login_cookie = False
+		for c in session.cookies:
+			if http_config["wordpress_cookie"] in c.name:
+				has_login_cookie = True
+
+		if not has_login_cookie:
+			check.addOutput("ERROR: Logged in cookie not set.")
 			return
 
 		check.addOutput("Logged in!")
