@@ -19,7 +19,7 @@ try:
 	service_icmp1 = Service("ICMP (1)", "icmp", "check_icmp")
 	service_icmp2 = Service("ICMP (2)", "icmp", "check_icmp")
 	service_ad = Service("AD", "ldap", "check_ldap_lookup")
-	service_http = Service("HTTP", "http", "check_custom_lockdownv1")
+	service_http = Service("HTTP", "http", "check_http")
 	service_ftp = Service("FTP", "ftp", "check_upload_download")
 	service_imap = Service("IMAP", "imap", "check_imap_login")
 	
@@ -53,7 +53,6 @@ try:
 		session.add_all([
 			TeamService(teams[i], service_http, "HOST", "10.%d.2.15" % (i), order=0),
 			TeamService(teams[i], service_http, "PORT", "80", order=1),
-			TeamService(teams[i], service_http, "PORT2", "32400", order=2),
 		])
 
 		# FTP
