@@ -1,4 +1,4 @@
-from config import config
+import config
 import imaplib
 import requests
 import re
@@ -12,8 +12,8 @@ imap_config = {
 # /DEFAULTS
 
 # CONFIG
-if "imap" in config:
-	imap_config.update(config["imap"])
+if "imap" in config.CHECKS:
+	imap_config.update(config.CHECKS["imap"])
 
 socket.setdefaulttimeout(imap_config["timeout"])
 # /CONFIG

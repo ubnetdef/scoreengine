@@ -1,5 +1,5 @@
 from binascii import hexlify
-from config import config
+import config
 from base64 import b64encode
 from datetime import datetime, timedelta
 from hashlib import sha1
@@ -16,8 +16,8 @@ http_config = {
 # /DEFAULTS
 
 # CONFIG
-if "http" in config:
-	http_config.update(config["http"])
+if "http" in config.CHECKS:
+	http_config.update(config.CHECKS["http"])
 # /CONFIG
 
 def check_http(check, data):

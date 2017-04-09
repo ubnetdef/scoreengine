@@ -1,5 +1,5 @@
 from binascii import hexlify
-from config import config
+import config
 from ftplib import FTP
 from os.path import basename
 from os import urandom
@@ -16,8 +16,8 @@ ftp_config = {
 # /DEFAULTS
 
 # CONFIG
-if "ftp" in config:
-	ftp_config.update(config["ftp"])
+if "ftp" in config.CHECKS:
+	ftp_config.update(config.CHECKS["ftp"])
 # /CONFIG
 
 def check_upload_download(check, data):

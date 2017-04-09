@@ -1,5 +1,5 @@
 import subprocess
-from config import config
+import config
 
 # DEFAULTS
 icmp_config = {
@@ -9,8 +9,8 @@ icmp_config = {
 # /DEFAULTS
 
 # CONFIG
-if "icmp" in config:
-	icmp_config.update(config["icmp"])
+if "icmp" in config.CHECKS:
+	icmp_config.update(config.CHECKS["icmp"])
 # /CONFIG
 
 def check_icmp(check, data):

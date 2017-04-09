@@ -1,6 +1,7 @@
 from __future__ import absolute_import
-from config import config
+import config
 import ldap
+
 
 # DEFAULTS
 ldap_config = {
@@ -9,8 +10,8 @@ ldap_config = {
 # /DEFAULTS
 
 # CONFIG
-if "ldap" in config:
-	ldap_config.update(config["ldap"])
+if "ldap" in config.CHECKS:
+	ldap_config.update(config.CHECKS["ldap"])
 # /CONFIG
 
 def check_ldap_lookup(check, data):

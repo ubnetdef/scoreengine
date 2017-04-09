@@ -1,4 +1,4 @@
-from config import config
+import config
 from scoring import Session
 from scoring.models import Team, Service, TeamService, Check
 from datetime import datetime
@@ -86,7 +86,7 @@ class Master(object):
 
 			# Tell the Bank API to give some money
 			if check.getPassed():
-				r = requests.post("http://%s/internalGiveMoney" % (config["BANK_SERVER"]), data={'username': config["BANK_USER"], 'password': config["BANK_PASS"], 'team': team["id"]})
+				r = requests.post("http://%s/internalGiveMoney" % (config.BANK["SERVER"]), data={'username': config.BANK["USER"], 'password': config.BANK["PASS"], 'team': team["id"]})
 
 class ServiceCheck(object):
 	def __init__(self, team, service):

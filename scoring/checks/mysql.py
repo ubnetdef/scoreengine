@@ -1,4 +1,4 @@
-from config import config
+import config
 import MySQLdb
 
 # DEFAULTS
@@ -10,8 +10,8 @@ mysql_config = {
 # /DEFAULTS
 
 # CONFIG
-if "mysql" in config:
-	mysql_config.update(config["mysql"])
+if "mysql" in config.CHECKS:
+	mysql_config.update(config.CHECKS["mysql"])
 # /CONFIG
 
 def check_query_server(check, data):

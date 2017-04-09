@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from config import config
+import config
 from dns.resolver import Resolver
 
 # DEFAULTS
@@ -10,8 +10,8 @@ dns_config = {
 # /DEFAULTS
 
 # CONFIG
-if "dns" in config:
-	dns_config.update(config["dns"])
+if "dns" in config.CHECKS:
+	dns_config.update(config.CHECKS["dns"])
 # /CONFIG
 
 def check_dns(check, data):
