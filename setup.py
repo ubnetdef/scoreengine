@@ -12,7 +12,7 @@ try:
 	# Create teams
 	teams = {}
 	for i in range(config.TEAMS["MIN_NUM"], config.TEAMS["MAX_NUM"]):
-		teams[i] = Team("Team %d" % i)
+		teams[i] = Team("Team {}".format(i))
 		session.add(teams[i])
 
 	# Create services
@@ -27,7 +27,7 @@ try:
 					teams[i],
 					service,
 					datum.key,
-					datum.value % {"team": i},
+					datum.value.format(team=i),
 					**datum.kwargs
 				)
 				for datum in sconfig.data
@@ -37,7 +37,7 @@ try:
 	session.commit()
 
 except Exception as e:
-	print "Error: %s" % e
+	print "Error: {}".format(e)
 	session.rollback()
 
 	import traceback

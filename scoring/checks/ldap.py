@@ -15,7 +15,7 @@ if "ldap" in config.CHECKS:
 # /CONFIG
 
 def check_ldap_lookup(check, data):
-	check.addOutput("ScoreEngine: %s Check\n" % (check.getServiceName()))
+	check.addOutput("ScoreEngine: {} Check\n".format(check.getServiceName()))
 	check.addOutput("EXPECTED: Sucessful and correct query against the AD (LDAP) server")
 	check.addOutput("OUTPUT:\n")
 
@@ -23,14 +23,11 @@ def check_ldap_lookup(check, data):
 
 	try:
 		# Setup LDAP
-		l = ldap.initialize('ldap://%s' % data["HOST"])
+		l = ldap.initialize('ldap://{HOST}'.format(**data))
 
 		# Bind to the user we're using to lookup
-		domain = data["DOMAIN"]
-		username = data["USER"]
+		actual_username = "{USER}@{DOMAIN}".format(**data)
 		password = data["PASS"]
-
-		actual_username = "%s@%s" % (username, domain)
 
 		l.protocol_version = ldap.VERSION3
 		l.set_option(ldap.OPT_NETWORK_TIMEOUT, ldap_config["timeout"])
@@ -40,6 +37,6 @@ def check_ldap_lookup(check, data):
 		check.setPassed()
 		check.addOutput("Check successful!")
 	except Exception as e:
-		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
+		check.addOutput("ERROR: {}: {}".format(type(e).__name__, e))
 
 		return

@@ -15,7 +15,7 @@ if "dns" in config.CHECKS:
 # /CONFIG
 
 def check_dns(check, data):
-	check.addOutput("ScoreEngine: %s Check\n" % (check.getServiceName()))
+	check.addOutput("ScoreEngine: {} Check\n".format(check.getServiceName()))
 	check.addOutput("EXPECTED: Sucessful and correct query against the DNS server")
 	check.addOutput("OUTPUT:\n")
 
@@ -29,7 +29,7 @@ def check_dns(check, data):
 
 	try:
 		# Query resolver
-		check.addOutput("Querying %s for '%s'..." % (data["HOST"], data["LOOKUP"]))
+		check.addOutput("Querying {HOST} for '{LOOKUP}'...".format(**data))
 		lookup = resolv.query(data["LOOKUP"], data["TYPE"])
 
 		found = False
@@ -37,7 +37,7 @@ def check_dns(check, data):
 			if str(ans) == data["EXPECTED"]:
 				found = True
 			else:
-				check.addOutput("NOTICE: DNS Server returned %" % (ans))
+				check.addOutput("NOTICE: DNS Server returned {}".format(ans))
 
 		if not found:
 			check.addOutput("ERROR: DNS Server did not respond with the correct IP")
@@ -47,6 +47,6 @@ def check_dns(check, data):
 		check.setPassed()
 		check.addOutput("Check successful!")
 	except Exception as e:
-		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
+		check.addOutput("ERROR: {}: {}".format(type(e).__name__, e))
 
 		return

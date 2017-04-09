@@ -1,3 +1,4 @@
+from __future__ import print_function
 import config
 from scoring import celery_app, Session
 from scoring.models import Team, Service, TeamService, Check
@@ -81,10 +82,10 @@ class Master(object):
 
 		if dryRun:
 			printLock.acquire()
-			print "---------[ TEAM: %s | SERVICE: %s" % (team["name"], service["name"])
+			print("---------[ TEAM: {} | SERVICE: {}".format(team["name"], service["name"]))
 			for line in check.getOutput():
-				print line
-			print "---------[ PASSED: %r" % (check.getPassed())
+				print(line)
+			print("---------[ PASSED: {}".format(check.getPassed()))
 			printLock.release()
 		else:
 			session = Session()
@@ -94,12 +95,12 @@ class Master(object):
 
 			# Print out some data
 			printLock.acquire()
-			print "Round: %04d | %s | Service: %s | Passed: %r" % (round, team["name"].ljust(8), service["name"].ljust(15), check.getPassed())
+			print("Round: {:04d} | {} | Service: {} | Passed: {}".format(self.round, team["name"].ljust(8), service["name"].ljust(15), check.getPassed()))
 			printLock.release()
 
 			# Tell the Bank API to give some money
 			if check.getPassed() and config.BANK["ENABLED"]:
-				r = requests.post("http://%s/internalGiveMoney" % (config.BANK["SERVER"]), data={'username': config.BANK["USER"], 'password': config.BANK["PASS"], 'team': team["id"]})
+				r = requests.post("http://{}/internalGiveMoney".format(config.BANK["SERVER"]), data={'username': config.BANK["USER"], 'password': config.BANK["PASS"], 'team': team["id"]})
 
 class ServiceCheck(object):
 	def __init__(self, team, service):
@@ -143,7 +144,7 @@ class ServiceCheck(object):
 		self.getCheck()(self, checkData)
 
 	def getCheck(self):
-		group = importlib.import_module('scoring.checks.%s' % (self.service["group"]))
+		group = importlib.import_module('scoring.checks.{}'.format(self.service["group"]))
 
 		return getattr(group, self.service["check"])
 

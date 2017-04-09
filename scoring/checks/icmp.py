@@ -17,8 +17,8 @@ def check_icmp(check, data):
 	command = [icmp_config["command"], "-c", "1", "-t", str(icmp_config["timeout"]), str(data["IP"])]
 	strCommand = ' '.join(command)
 
-	check.addOutput("ScoreEngine: %s Check\n" % (check.getServiceName()))
-	check.addOutput("RUNNING: %s" % (strCommand))
+	check.addOutput("ScoreEngine: {} Check\n".format(check.getServiceName()))
+	check.addOutput("RUNNING: {}".format(strCommand))
 	check.addOutput("EXPECTED: 1 packet received")
 	check.addOutput("OUTPUT:")
 

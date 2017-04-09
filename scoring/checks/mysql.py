@@ -15,7 +15,7 @@ if "mysql" in config.CHECKS:
 # /CONFIG
 
 def check_wordpress(check, data):
-	check.addOutput("ScoreEngine: %s Check\n" % (check.getServiceName()))
+	check.addOutput("ScoreEngine: {} Check\n".format(check.getServiceName()))
 	check.addOutput("EXPECTED: Login and query against a Wordpress Database")
 	check.addOutput("OUTPUT:\n")
 
@@ -24,7 +24,7 @@ def check_wordpress(check, data):
 
 	try:
 		# Connect to the db
-		check.addOutput("Connecting to %s:%s" % (data["HOST"], data["PORT"]))
+		check.addOutput("Connecting to {HOST}:{PORT}".format(**data))
 		db = MySQLdb.connect(host=data["HOST"],
 							port=int(data["PORT"]),
 							user=data["USER"],
@@ -54,13 +54,13 @@ def check_wordpress(check, data):
 		check.setPassed()
 		check.addOutput("Check successful!")
 	except Exception as e:
-		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
+		check.addOutput("ERROR: {}: {}".format(type(e).__name__, e))
 
 		return
 
 
 def check_query_server(check, data):
-	check.addOutput("ScoreEngine: %s Check\n" % (check.getServiceName()))
+	check.addOutput("ScoreEngine: {} Check\n".format(check.getServiceName()))
 	check.addOutput("EXPECTED: Sucessful login on the MySQL Database")
 	check.addOutput("OUTPUT:\n")
 
@@ -69,7 +69,7 @@ def check_query_server(check, data):
 
 	try:
 		# Connect to the db
-		check.addOutput("Connecting to %s:%s" % (data["HOST"], data["PORT"]))
+		check.addOutput("Connecting to {HOST}:{PORT}".format(**data))
 		db = MySQLdb.connect(host=data["HOST"],
 							port=int(data["PORT"]),
 							user=data["USER"],
@@ -98,6 +98,6 @@ def check_query_server(check, data):
 		check.setPassed()
 		check.addOutput("Check successful!")
 	except Exception as e:
-		check.addOutput("ERROR: %s: %s" % (type(e).__name__, e))
+		check.addOutput("ERROR: {}: {}".format(type(e).__name__, e))
 
 		return
