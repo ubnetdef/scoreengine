@@ -9,7 +9,7 @@ from tempfile import NamedTemporaryFile
 
 # DEFAULTS
 ftp_config = {
-	'timeout': 5,
+	'timeout': 15,
 	'prefix': 'scoreengine_',
 	'bufsize': 0
 }
