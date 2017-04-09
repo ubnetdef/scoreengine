@@ -38,6 +38,11 @@ def check_http(check, data):
 		check.addOutput("Connecting to http://%s:%s" % (data["HOST"], data["PORT"]))
 		session = requests.Session()
 		req = session.get("http://%s:%s" % (data["HOST"], data["PORT"]), timeout=http_config["timeout"])
+
+		if req.status_code != 200:
+			check.addOutput("ERROR: Page returned status code %d" % (req.status_code))
+			return
+
 		check.addOutput("Connected!")
 
 		# It passed all our check
