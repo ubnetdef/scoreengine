@@ -11,7 +11,7 @@ config = {
 	'BANK_PASS': 'x',
 }
 
-# Scoring config - IMCP
-config['imcp'] = {
+# Scoring config - ICMP
+config['icmp'] = {
 	'timeout': 5
 }

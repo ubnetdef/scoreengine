@@ -16,15 +16,15 @@ try:
 		session.add(teams[i])
 
 	# Create our services
-	service_imcp1 = Service("ICMP (1)", "imcp", "check_imcp")
-	service_imcp2 = Service("ICMP (2)", "imcp", "check_imcp")
+	service_icmp1 = Service("ICMP (1)", "icmp", "check_icmp")
+	service_icmp2 = Service("ICMP (2)", "icmp", "check_icmp")
 	service_ad = Service("AD", "ldap", "check_ldap_lookup")
 	service_http = Service("HTTP", "http", "check_custom_lockdownv1")
 	service_ftp = Service("FTP", "ftp", "check_upload_download")
 	service_imap = Service("IMAP", "imap", "check_imap_login")
 	
 	session.add_all([
-		service_imcp1, service_imcp2, service_ad,
+		service_icmp1, service_icmp2, service_ad,
 		service_http, service_ftp, service_imap
 	])
 
@@ -32,10 +32,10 @@ try:
 	for i in range(config['TEAM_MIN_NUM'], config['TEAM_MAX_NUM']):
 		# ICMP
 		session.add_all([
-			TeamService(teams[i], service_imcp1, "IP", "10.%d.1.15" % (i), edit=False),
-			TeamService(teams[i], service_imcp1, "IP", "10.%d.1.25" % (i), edit=False),
-			TeamService(teams[i], service_imcp2, "IP", "10.%d.1.67" % (i), edit=False),
-			TeamService(teams[i], service_imcp2, "IP", "10.%d.1.77" % (i), edit=False)
+			TeamService(teams[i], service_icmp1, "IP", "10.%d.1.15" % (i), edit=False),
+			TeamService(teams[i], service_icmp1, "IP", "10.%d.1.25" % (i), edit=False),
+			TeamService(teams[i], service_icmp2, "IP", "10.%d.1.67" % (i), edit=False),
+			TeamService(teams[i], service_icmp2, "IP", "10.%d.1.77" % (i), edit=False)
 		])
 
 		# AD

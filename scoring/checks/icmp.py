@@ -2,19 +2,19 @@ import subprocess
 from config import config
 
 # DEFAULTS
-imcp_config = {
+icmp_config = {
 	'timeout': 5,
 	'command': "ping"
 }
 # /DEFAULTS
 
 # CONFIG
-if "imcp" in config:
-	imcp_config.update(config["imcp"])
+if "icmp" in config:
+	icmp_config.update(config["icmp"])
 # /CONFIG
 
-def check_imcp(check, data):
-	command = [imcp_config["command"], "-c", "1", "-t", str(imcp_config["timeout"]), str(data["IP"])]
+def check_icmp(check, data):
+	command = [icmp_config["command"], "-c", "1", "-t", str(icmp_config["timeout"]), str(data["IP"])]
 	strCommand = ' '.join(command)
 
 	check.addOutput("ScoreEngine: %s Check\n" % (check.getServiceName()))
