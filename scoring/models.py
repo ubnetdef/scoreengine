@@ -45,14 +45,16 @@ class TeamService(Base):
 	key = db.Column(db.String(255))
 	value = db.Column(db.Text)
 	edit = db.Column(db.Boolean)
+	hidden = db.Column(db.Boolean)
 	order = db.Column(db.Integer)
 
-	def __init__(self, team, service, key, value, edit=True, order=0):
+	def __init__(self, team, service, key, value, edit=True, hidden=False, order=0):
 		self.team = team
 		self.service = service
 		self.key = key
 		self.value = value
 		self.edit = edit
+		self.hidden = hidden
 		self.order = order
 
 class Check(Base):
