@@ -4,10 +4,6 @@
 
 import os
 
-
-_basedir = os.path.abspath(os.path.dirname(__file__))
-
-
 class _Service:
 	def __init__(self, group, check, *data):
 		self.group = group
@@ -25,7 +21,11 @@ class _Data:
 ####################  EDIT BELOW HERE  ####################
 ###########################################################
 
-DATABASE_URI = "sqlite:///" + os.path.join(_basedir, "app.db")
+DATABASE_URI = "mysql://user:pass@localhost:3306/scoreengine"
+DATABASE_EXTRA = {
+	"pool_size": 40,
+	"max_overflow": 60,
+}
 
 BANK = {
 	"SERVER": "localhost",
@@ -111,5 +111,5 @@ SERVICES = {
 		_Data("PASS", "lori4prez", order=3),
 		_Data("DB_LOOKUP", "wordpress", order=4),
 		_Data("BLOG_NAME", "Lori Bird 4 Prez 2k17", order=5)
-	)
+	),
 }
