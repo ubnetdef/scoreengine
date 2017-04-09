@@ -69,7 +69,7 @@ def check_query_server(check, data):
 
 	try:
 		# Connect to the db
-		check.addOutput("Connecting to %s:%s" % (data["HOST"], data["PORT"], data["USER"], data["PASS"]))
+		check.addOutput("Connecting to %s:%s" % (data["HOST"], data["PORT"]))
 		db = MySQLdb.connect(host=data["HOST"],
 							port=int(data["PORT"]),
 							user=data["USER"],
