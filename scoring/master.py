@@ -1,5 +1,5 @@
 import config
-from scoring import Session
+from scoring import celery_app, Session
 from scoring.models import Team, Service, TeamService, Check
 from datetime import datetime
 from time import sleep
@@ -15,12 +15,15 @@ ScoringEngine
 Responsible for creating new CheckRound objects
 at specific intervals
 """
+
+
+printLock = allocate_lock()
+
+
 class Master(object):
 	def __init__(self, round=0):
 		self.started = datetime.utcnow()
 		self.round = round
-
-		self.printLock = allocate_lock()
 
 	def run(self):
 		while True:
@@ -60,18 +63,24 @@ class Master(object):
 			for service in services:
 				start_new_thread(self.new_check, (team, service, round))
 
-	def new_check(self, team, service, round, dryRun=False):
+	@staticmethod
+	@celery_app.task
+	def new_check_queue(*args, **kwargs):
+		return Master.new_check(*args, **kwargs)
+
+	@staticmethod
+	def new_check(team, service, round, dryRun=False):
 		check = ServiceCheck(team, service)
 
 		check.run()
 
 		if dryRun:
-			self.printLock.acquire()
+			printLock.acquire()
 			print "---------[ TEAM: %s | SERVICE: %s" % (team["name"], service["name"])
 			for line in check.getOutput():
 				print line
 			print "---------[ PASSED: %r" % (check.getPassed())
-			self.printLock.release()
+			printLock.release()
 		else:
 			session = Session()
 			session.add(Check(team["id"], service["id"], round, check.getPassed(), "\n".join(check.getOutput())))
@@ -79,9 +88,9 @@ class Master(object):
 			session.close()
 
 			# Print out some data
-			self.printLock.acquire()
-			print "Round: %04d | %s | Service: %s | Passed: %r" % (self.round, team["name"].ljust(8), service["name"].ljust(15), check.getPassed())
-			self.printLock.release()
+			printLock.acquire()
+			print "Round: %04d | %s | Service: %s | Passed: %r" % (round, team["name"].ljust(8), service["name"].ljust(15), check.getPassed())
+			printLock.release()
 
 			# Tell the Bank API to give some money
 			if check.getPassed() and config.BANK["ENABLED"]:

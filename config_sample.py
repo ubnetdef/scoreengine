@@ -4,11 +4,13 @@
 
 import os
 
+
 class _Service:
 	def __init__(self, group, check, *data):
 		self.group = group
 		self.check = check
 		self.data = data
+
 
 class _Data:
 	def __init__(self, key, value, **kwargs):
@@ -32,6 +34,10 @@ BANK = {
 	"SERVER": "localhost",
 	"USER": "username",
 	"PASS": "password"
+}
+
+CELERY = {
+	"BROKER": "pyamqp://guest@localhost//"  # None is safe to use if unavailable
 }
 
 CHECKS = {
