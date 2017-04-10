@@ -20,7 +20,6 @@ at specific intervals
 
 printLock = allocate_lock()
 
-
 class Master(object):
 	def __init__(self, round=0, only_queue=False):
 		self.started = datetime.utcnow()
@@ -95,7 +94,7 @@ class Master(object):
 
 			# Print out some data
 			printLock.acquire()
-			print("Round: {:04d} | {} | Service: {} | Passed: {}".format(self.round, team["name"].ljust(8), service["name"].ljust(15), check.getPassed()))
+			print("Round: {:04d} | {} | Service: {} | Passed: {}".format(round, team["name"].ljust(8), service["name"].ljust(15), check.getPassed()))
 			printLock.release()
 
 			# Tell the Bank API to give some money
