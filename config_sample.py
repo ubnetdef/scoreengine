@@ -55,65 +55,65 @@ TEAMS = {
 	"MAX_NUM": 11,
 }
 
-SERVICES = {
-	"Ubuntu Clients": _Service(
+SERVICES = [
+	("Ubuntu Clients", _Service(
 		"icmp",
 		"check_icmp",
 		_Data("IP", "10.{team}.1.10", edit=False),
 		_Data("IP", "10.{team}.1.20", edit=False)
-	),
+	)),
 
-	"Windows Clients": _Service(
+	("Windows Clients", _Service(
 		"icmp",
 		"check_icmp",
 		_Data("IP", "10.{team}.1.30", edit=False),
 		_Data("IP", "10.{team}.1.40", edit=False)
-	),
+	)),
 
 	# Active Directory
-	"AD": _Service(
+	("AD", _Service(
 		"ldap",
 		"check_ldap_lookup",
 		_Data("HOST", "10.{team}.1.50", order=0),
 		_Data("DOMAIN", "loribird{team}.win", edit=False, order=1),
 		_Data("USERPASS", "jgeistBird||Changeme123!", order=2),
 		_Data("USERPASS", "jdrosteBird||Changeme123!", order=2)
-	),
+	)),
 
 	# Wordpress
-	"HTTP Web": _Service(
+	("HTTP Web", _Service(
 		"http",
 		"check_wordpress",
 		_Data("HOST", "10.{team}.2.2", order=0),
 		_Data("PORT", "80", order=1),
 		_Data("USERPASS", "BirdMan||changeme", order=2),
-	),
+	)),
 
 	# Squirrelmail
-	"HTTP Mail": _Service(
+	("HTTP Mail", _Service(
 		"http",
 		"check_http",
 		_Data("HOST", "10.{team}.2.4", order=0),
 		_Data("PORT", "80", order=1)
-	),
+	)),
 
-	"FTP": _Service(
+	("FTP", _Service(
 		"ftp",
 		"check_upload_download",
 		_Data("HOST", "10.{team}.2.5", order=0),
 		_Data("USERPASS", "bigbird||Lorirox123", order=1)
-	),
+	)),
 
-	"IMAP": _Service(
+	("IMAP", _Service(
 		"imap",
 		"check_imap_login",
 		_Data("HOST", "10.{team}.2.4", order=0),
 		_Data("PORT", "143", order=1),
 		_Data("USERPASS", "backups||changeme", order=2)
-	),
+	)),
 
 	# MySQL
-	"DB": _Service(
+	("DB", _Service(
 		"mysql",
 		"check_wordpress",
 		_Data("HOST", "10.{team}.2.3", order=0),
@@ -122,5 +122,5 @@ SERVICES = {
 		_Data("PASS", "lori4prez", order=3),
 		_Data("DB_LOOKUP", "wordpress", order=4),
 		_Data("BLOG_NAME", "Lori Bird 4 Prez 2k17", order=5)
-	),
-}
+	)),
+]

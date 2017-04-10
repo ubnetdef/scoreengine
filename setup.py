@@ -16,7 +16,7 @@ try:
 		session.add(teams[i])
 
 	# Create services
-	for sname, sconfig in config.SERVICES.iteritems():
+	for sname, sconfig in config.SERVICES:
 		service = Service(sname, sconfig.group, sconfig.check)
 		session.add(service)
 
