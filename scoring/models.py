@@ -37,10 +37,10 @@ class TeamService(Base):
 	id = db.Column(db.Integer, primary_key=True)
 	
 	team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
-	team = relationship('Team')
+	team = relationship('Team', lazy='joined')
 	
 	service_id = db.Column(db.Integer, db.ForeignKey('services.id'))
-	service = relationship('Service')
+	service = relationship('Service', lazy='joined')
 
 	key = db.Column(db.String(255))
 	value = db.Column(db.Text)

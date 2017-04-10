@@ -3,7 +3,7 @@ from celery.bin import worker as Worker
 
 import config
 from scoring import celery_app, engine
-from scoring.master import Master
+from scoring.master2 import Master
 
 
 def main(args):
@@ -20,7 +20,7 @@ def main(args):
 		worker = Worker.worker(app=celery_app)
 		worker.run(**config.CELERY["WORKER"])
 	else:
-		master = Master(round=round, only_queue=args.master)
+		master = Master(round=round)
 		master.run()
 
 

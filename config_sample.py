@@ -1,7 +1,6 @@
 ###########################################################
 ###############  DO NOT EDIT THIS SECTION!  ###############
 ###########################################################
-
 import os
 
 class Service:
@@ -40,7 +39,8 @@ BANK = {
 
 # Configuration for our task queue
 CELERY = {
-	"BROKER": "pyamqp://guest@localhost//",  # None is safe to use if unavailable
+	"BROKER": "pyamqp://guest@localhost/",
+	"BACKEND": "db+{}".format(DATABASE_URI),
 	"WORKER": {
 		"concurrency": 20,
 		"loglevel": "INFO",

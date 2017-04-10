@@ -6,7 +6,7 @@ import config
 
 
 # Init Celery
-celery_app = Celery("scoreengine", broker=config.CELERY["BROKER"])
+celery_app = Celery("scoreengine", backend=config.CELERY["BACKEND"], broker=config.CELERY["BROKER"])
 
 # Init SQLAlchemy
 engine = create_engine(config.DATABASE_URI, **config.DATABASE_EXTRA)
