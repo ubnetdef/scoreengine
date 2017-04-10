@@ -80,6 +80,15 @@ SERVICES = [
 		_Data("USERPASS", "jdrosteBird||Changeme123!", order=2)
 	)),
 
+	("DNS", _Service(
+		"dns",
+		"check_dns",
+		_Data("HOST", "10.{team}.1.50", order=0),
+		_Data("LOOKUP", "loribird{team}.win", order=1),
+		_Data("TYPE", "A", order=2),
+		_Data("EXPECTED", "10.{team}.1.50", order=3)
+	)),
+
 	# Wordpress
 	("HTTP Web", _Service(
 		"http",
