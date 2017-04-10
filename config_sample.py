@@ -39,6 +39,7 @@ BANK = {
 CELERY = {
 	"BROKER": "pyamqp://guest@localhost//",  # None is safe to use if unavailable
 	"WORKER": {
+		"concurrency": 20,
 		"loglevel": "INFO",
 		"traceback": True
 	}
