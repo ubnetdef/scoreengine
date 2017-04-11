@@ -2,7 +2,6 @@ import config
 from scoring import engine, Session
 from scoring.models import *
 
-
 try:
 	# Initialize DB
 	session = Session()

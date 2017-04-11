@@ -1,12 +1,16 @@
 from billiard.exceptions import SoftTimeLimitExceeded
 from scoring import celery_app
+from scoring.logger import logger
 import importlib
 
 @celery_app.task(soft_time_limit=30)
 def check_task(sc):
 	try:
 		# Load the check class
-		group = importlib.import_module('scoring.checks.{}'.format(sc["check"]["group"]))
+		module = "scoring.checks.{}".format(sc["check"]["group"])
+		logger.debug("Using module '{}'".format(module))
+
+		group = importlib.import_module(module)
 		check = getattr(group, sc["check"]["func"])
 
 		service = ServiceConfig(sc)

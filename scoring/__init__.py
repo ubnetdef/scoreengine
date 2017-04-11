@@ -1,9 +1,7 @@
 from celery import Celery
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-
 import config
-
 
 # Init Celery
 celery_app = Celery("scoreengine", backend=config.CELERY["BACKEND"], broker=config.CELERY["BROKER"])

@@ -1,10 +1,8 @@
 import argparse
-from celery.bin import worker as Worker
-
 import config
+from celery.bin import worker as Worker
 from scoring import celery_app, engine
 from scoring.master2 import Master
-
 
 def main(args):
 	if args.reset:
@@ -25,7 +23,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description='ScoreEngine')
+	parser = argparse.ArgumentParser(description='ScoreEngine control center')
 
 	parser.add_argument('--reset', help='reset all existing checks', action='store_true', default=False)
 	parser.add_argument('--round', help='round to start at', type=int, default=0)

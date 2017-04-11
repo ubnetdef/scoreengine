@@ -1,12 +1,11 @@
-from __future__ import print_function
 from datetime import datetime
+from scoring.logger import logger
 import config
 import random
 import scoring
 import scoring.models as models
 import scoring.worker
 import signal
-import sys
 import time
 import threading
 
@@ -28,10 +27,10 @@ class Master(object):
 		signal.signal(signal.SIGINT, self.shutdown)
 
 	def shutdown(self, signal, frame):
-		print("[MASTER] Caught CTRL+C. Shutting down rounds...")
+		logger.warn("Caught CTRL+C. Turning off spawning of additional rounds")
 
 		self.no_more_rounds = True
-		print("{} tasks remaining. Waiting for them to finish before shutting down.".format(len(self.tasks)))
+		logger.warn("{} tasks remaining. Waiting for them to finish before shutting down.".format(len(self.tasks)))
 
 	def run(self):
 		# Launch the reaper thread
@@ -61,7 +60,7 @@ class Master(object):
 				if task.state == "PENDING":
 					continue
 
-				print("[REAPER] Reaping {}".format(t))
+				logger.info("Reaping {}".format(t))
 				session = scoring.Session()
 
 				# Add the successful check
@@ -91,7 +90,7 @@ class Master(object):
 				task.forget()
 				self.tasks.remove(t)
 
-			time.sleep(10)
+			time.sleep(config.ROUND["reaper"])
 
 	def start_round(self, round):
 		# Grab all the Team Services that are (currently) enabled
@@ -126,7 +125,7 @@ class Master(object):
 			self.tasks.append(task.id)
 			self.round_tasks[round].append(task.id)
 
-			print("[MASTER] Created Task #{}".format(task.id))
+			logger.info("Created Task #{}".format(task.id))
 
 	def buildServiceCheck(self, session, round, team, service, check):
 		data = session.query(models.TeamService) \
