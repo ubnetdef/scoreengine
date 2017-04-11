@@ -1,9 +1,10 @@
-from binascii import hexlify
-import config
 from base64 import b64encode
+from binascii import hexlify
 from datetime import datetime, timedelta
+from fake_useragent import UserAgent
 from hashlib import sha1
 from os import urandom
+import config
 import requests
 import re
 
@@ -19,6 +20,11 @@ http_config = {
 # CONFIG
 if "http" in config.CHECKS:
 	http_config.update(config.CHECKS["http"])
+
+http_headers = {
+	"Connection": "close",
+	"User-Agent": UserAgent().random
+}
 # /CONFIG
 
 def check_http(check, data):
@@ -34,7 +40,7 @@ def check_http(check, data):
 		# Connect to the website
 		check.addOutput("Connecting to http://{HOST}:{PORT}".format(**data))
 		session = requests.Session()
-		req = session.get("http://{HOST}:{PORT}".format(**data), timeout=http_config["timeout"])
+		req = session.get("http://{HOST}:{PORT}".format(**data), timeout=http_config["timeout"], headers=http_headers)
 
 		if req.status_code != 200:
 			check.addOutput("ERROR: Page returned status code {}".format(req.status_code))
@@ -63,7 +69,7 @@ def check_wordpress(check, data):
 		# Connect to the website
 		check.addOutput("Connecting to http://{HOST}:{PORT}".format(**data))
 		session = requests.Session()
-		req = session.get("http://{HOST}:{PORT}".format(**data), timeout=http_config["timeout"])
+		req = session.get("http://{HOST}:{PORT}".format(**data), timeout=http_config["timeout"], headers=http_headers)
 
 		if req.status_code != 200:
 			check.addOutput("ERROR: Page returned status code {}".format(req.status_code))
@@ -79,7 +85,7 @@ def check_wordpress(check, data):
 		}
 
 		check.addOutput("Loading login page")
-		req = session.get(login_url, timeout=http_config["timeout"])
+		req = session.get(login_url, timeout=http_config["timeout"], headers=http_headers)
 
 		if req.status_code != 200:
 			check.addOutput("ERROR: Page returned status code {}".format(req.status_code))
@@ -89,7 +95,7 @@ def check_wordpress(check, data):
 
 		# Attempt to login
 		check.addOutput("Attempting to login")
-		req = session.post(login_url, data=login_payload, timeout=http_config["timeout"])
+		req = session.post(login_url, data=login_payload, timeout=http_config["timeout"], headers=http_headers)
 
 		if req.status_code != 200:
 			check.addOutput("ERROR: Page returned status code {}".format(req.status_code))

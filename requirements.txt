@@ -3,6 +3,7 @@ appdirs==1.4.3
 billiard==3.5.0.2
 celery==4.0.2
 dnspython==1.15.0
+fake-useragent==0.1.7
 funcsigs==1.0.2
 futures==3.0.5
 kombu==4.0.2
