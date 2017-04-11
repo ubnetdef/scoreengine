@@ -1,7 +1,7 @@
 from __future__ import print_function
 import config
 from scoring import celery_app, Session
-from scoring.models import Team, Service, TeamService, Check
+from scoring.models import Round, Team, Service, TeamService, Check
 from datetime import datetime
 from time import sleep
 from thread import start_new_thread, allocate_lock
@@ -22,6 +22,7 @@ class Master(object):
 	def __init__(self, round=0):
 		self.started = datetime.utcnow()
 		self.round = round
+		self.round_tasks = {}
 
 	def run(self):
 		while True:
@@ -53,16 +54,21 @@ class Master(object):
 				'check': service.check
 			})
 
-		# Close the session
+		# Create a new round
+		self.round_tasks[round] = []
+		session.add(Round(round))
+
+		# Commit and close the session
+		session.commit()
 		session.close()
 
 		# Start the checks!
 		for team in teams:
 			for service in services:
+				self.round_tasks[round].append((team, service))
 				start_new_thread(self.new_check, (team, service, round))
 
-	@staticmethod
-	def new_check(team, service, round, dryRun=False):
+	def new_check(self, team, service, round, dryRun=False):
 		check = ServiceCheck(team, service)
 
 		check.run()
@@ -76,7 +82,21 @@ class Master(object):
 			printLock.release()
 		else:
 			session = Session()
+
+			# Add the check
 			session.add(Check(team["id"], service["id"], round, check.getPassed(), "\n".join(check.getOutput())))
+
+			# Finish the round if it's done
+			self.round_tasks[round].remove((team, service))
+			if len(self.round_tasks[round]) == 0:
+				roundObj = session.query(Round).filter(Round.number == round).first()
+				roundObj.completed = True
+				roundObj.finish = datetime.utcnow()
+
+				# Delete from our tracking array
+				del self.round_tasks[round]
+
+			# Commit and close
 			session.commit()
 			session.close()
 
