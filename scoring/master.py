@@ -3,12 +3,12 @@ import config
 from scoring import celery_app, Session
 from scoring.models import Round, Team, Service, TeamService, Check
 from datetime import datetime
-from time import sleep
 from thread import start_new_thread, allocate_lock
 import random
 import requests
 import importlib
 import os
+import time
 
 """
 ScoringEngine
