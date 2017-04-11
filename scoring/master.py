@@ -16,15 +16,12 @@ ScoringEngine
 Responsible for creating new CheckRound objects
 at specific intervals
 """
-
-
 printLock = allocate_lock()
 
 class Master(object):
-	def __init__(self, round=0, only_queue=False):
+	def __init__(self, round=0):
 		self.started = datetime.utcnow()
 		self.round = round
-		self.only_queue = only_queue
 
 	def run(self):
 		while True:
@@ -62,16 +59,7 @@ class Master(object):
 		# Start the checks!
 		for team in teams:
 			for service in services:
-				if self.only_queue:
-					self.new_check_task.delay(team, service, round)
-				else:
-					start_new_thread(self.new_check, (team, service, round))
-
-
-	@staticmethod
-	@celery_app.task
-	def new_check_task(*args, **kwargs):
-		return Master.new_check(*args, **kwargs)
+				start_new_thread(self.new_check, (team, service, round))
 
 	@staticmethod
 	def new_check(team, service, round, dryRun=False):

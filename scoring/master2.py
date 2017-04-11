@@ -2,6 +2,7 @@ from datetime import datetime
 from scoring.logger import logger
 import config
 import random
+import requests
 import scoring
 import scoring.models as models
 import scoring.worker
@@ -11,12 +12,10 @@ import threading
 
 class Master(object):
 	def __init__(self, round=0):
-		self.started = datetime.utcnow()
 		self.round = round
 		self.tasks = []
 		self.round_tasks = {}
 		self.reaper = None
-		self.manager = None
 
 		self.no_more_rounds = False
 
@@ -25,6 +24,8 @@ class Master(object):
 
 		# Catch CTRL+C signal
 		signal.signal(signal.SIGINT, self.shutdown)
+
+		logger.info("ScoreEngine started up")
 
 	def shutdown(self, signal, frame):
 		logger.warn("Caught CTRL+C. Turning off spawning of additional rounds")
@@ -87,6 +88,16 @@ class Master(object):
 				session.commit()
 				session.close()
 
+				# Bank Hook
+				# Tell the Bank API to give some money
+				if task.result["passed"] and config.BANK["ENABLED"]:
+					requests.post("http://{}/internalGiveMoney".format(config.BANK["SERVER"]), data={
+						'username': config.BANK["USER"],
+						'password': config.BANK["PASS"],
+						'team': team["id"]
+					})
+
+				# Remove from the tasks
 				task.forget()
 				self.tasks.remove(t)
 
@@ -157,4 +168,3 @@ class Master(object):
 			"passed": False,
 			"output": [],
 		}
-
