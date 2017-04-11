@@ -24,13 +24,16 @@ class Master(object):
 		self.round = round
 		self.round_tasks = {}
 
+		self.sleep_startrange = (config.ROUND["time"]-config.ROUND["jitter"])
+		self.sleep_endrange = (config.ROUND["time"]+config.ROUND["jitter"]+1)
+
 	def run(self):
 		while True:
 			self.round += 1
 
 			start_new_thread(self.new_round, (self.round,))
 
-			sleep(60)
+			time.sleep(random.randrange(self.sleep_startrange, self.sleep_endrange))
 
 	def new_round(self, round):
 		# Make a new session for this thread

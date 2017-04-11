@@ -48,6 +48,13 @@ CELERY = {
 	}
 }
 
+# Round configuration
+ROUND = {
+	"time": 60,
+	"jitter": 5,
+	"reaper": 5,
+}
+
 # This section is for overriding check-specific
 # configuration
 CHECKS = {
