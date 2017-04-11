@@ -8,7 +8,7 @@ from scoring.master2 import Master
 
 def main(args):
 	if args.reset:
-		engine.execute("TRUNCATE checks;")
+		engine.execute("TRUNCATE checks; TRUNCATE rounds; TRUNCATE celery_taskmeta;")
 
 	# ScoreEngine will automatically start at
 	# round+1, so subtract 1 if we're given a round

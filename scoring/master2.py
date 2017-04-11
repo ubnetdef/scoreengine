@@ -1,10 +1,12 @@
 from __future__ import print_function
 from datetime import datetime
-from scoring import celery_app, Session
-from scoring.models import Team, Service, TeamService, Check
 import config
 import random
-import importlib
+import scoring
+import scoring.models as models
+import scoring.worker
+import signal
+import sys
 import time
 import threading
 
@@ -13,10 +15,23 @@ class Master(object):
 		self.started = datetime.utcnow()
 		self.round = round
 		self.tasks = []
+		self.round_tasks = {}
 		self.reaper = None
+		self.manager = None
+
+		self.no_more_rounds = False
 
 		self.sleep_startrange = (config.ROUND["time"]-config.ROUND["jitter"])
 		self.sleep_endrange = (config.ROUND["time"]+config.ROUND["jitter"]+1)
+
+		# Catch CTRL+C signal
+		signal.signal(signal.SIGINT, self.shutdown)
+
+	def shutdown(self, signal, frame):
+		print("[MASTER] Caught CTRL+C. Shutting down rounds...")
+
+		self.no_more_rounds = True
+		print("{} tasks remaining. Waiting for them to finish before shutting down.".format(len(self.tasks)))
 
 	def run(self):
 		# Launch the reaper thread
@@ -27,7 +42,7 @@ class Master(object):
 		self.start_rounds()
 
 	def start_rounds(self):
-		while True:
+		while not self.no_more_rounds:
 			self.round += 1
 
 			# Start our round thread
@@ -38,38 +53,51 @@ class Master(object):
 			time.sleep(random.randrange(self.sleep_startrange, self.sleep_endrange))
 
 	def start_reaper(self):
-		while True:
+		while not self.no_more_rounds or len(self.tasks) > 0:
 			# Iterate over the tasks, check for any that are completed
 			for t in self.tasks:
-				task = self.check_task.AsyncResult(t)
+				task = scoring.worker.check_task.AsyncResult(t)
 				
 				if task.state == "PENDING":
 					continue
 
-				print("REAPER: Reaping {}".format(t))
-				session = Session()
+				print("[REAPER] Reaping {}".format(t))
+				session = scoring.Session()
 
-				chk = Check(task.result['team_id'],
-						task.result['service_id'],
-						task.result['round'],
-						task.result['passed'],
-						"\n".join(task.result['output']))
-
+				# Add the successful check
+				chk = models.Check(task.result["team_id"],
+						task.result["service_id"],
+						task.result["round"],
+						task.result["passed"],
+						"\n".join(task.result["output"]))
 				session.add(chk)
-				session.commit()
 
+				# Add the round, if it's the last one
+				round = task.result["round"]
+				self.round_tasks[round].remove(t)
+				if len(self.round_tasks[round]) == 0:
+					# Update the round
+					roundObj = session.query(models.Round).filter(models.Round.number == round).first()
+					roundObj.completed = True
+					roundObj.finish = datetime.utcnow()
+
+					# Delete from our tracking array
+					del self.round_tasks[round]
+
+				# Close and commit
+				session.commit()
 				session.close()
 
 				task.forget()
 				self.tasks.remove(t)
 
-			time.sleep(15)
+			time.sleep(10)
 
 	def start_round(self, round):
 		# Grab all the Team Services that are (currently) enabled
-		session = Session()
-		teams = [t.id for t in session.query(Team).filter(Team.enabled == True).all()]
-		services = session.query(Service).filter(Service.enabled == True).all()
+		session = scoring.Session()
+		teams = [t.id for t in session.query(models.Team).filter(models.Team.enabled == True).all()]
+		services = session.query(models.Service).filter(models.Service.enabled == True).all()
 		teamservices = []
 
 		for team in teams:
@@ -81,6 +109,12 @@ class Master(object):
 				}
 				teamservices.append(self.buildServiceCheck(session, round, team, service.id, check))
 
+		# Start the round
+		session.add(models.Round(round))
+		self.round_tasks[round] = []
+
+		# Close our DB session
+		session.commit()
 		session.close()
 
 		# Shuffle it up
@@ -88,14 +122,15 @@ class Master(object):
 
 		# Create the tasks
 		for sc in teamservices:
-			task = self.check_task.delay(sc)
+			task = scoring.worker.check_task.delay(sc)
 			self.tasks.append(task.id)
+			self.round_tasks[round].append(task.id)
 
-			print("Created Task #{}".format(task.id))
+			print("[MASTER] Created Task #{}".format(task.id))
 
 	def buildServiceCheck(self, session, round, team, service, check):
-		data = session.query(TeamService) \
-			.filter(TeamService.team_id == team, TeamService.service_id == service) \
+		data = session.query(models.TeamService) \
+			.filter(models.TeamService.team_id == team, models.TeamService.service_id == service) \
 			.all()
 
 		checkDataInitial = {}
@@ -124,33 +159,3 @@ class Master(object):
 			"output": [],
 		}
 
-	@staticmethod
-	@celery_app.task
-	def check_task(sc):
-		# Load the check class
-		group = importlib.import_module('scoring.checks.{}'.format(sc["check"]["group"]))
-		check = getattr(group, sc["check"]["func"])
-
-		service = ServiceConfig(sc)
-		check(service, service.getConfig())
-
-		return service.export()
-
-class ServiceConfig(object):
-	def __init__(self, sc):
-		self.service = sc
-
-	def getConfig(self):
-		return self.service["config"]
-
-	def getServiceName(self):
-		return self.service["check"]["name"]
-
-	def setPassed(self):
-		self.service["passed"] = True
-
-	def addOutput(self, message):
-		self.service["output"].append(message)
-
-	def export(self):
-		return self.service

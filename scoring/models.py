@@ -5,6 +5,21 @@ import sqlalchemy as db
 
 Base = declarative_base()
 
+class Round(Base):
+	__tablename__ = 'rounds'
+
+	id = db.Column(db.Integer, primary_key=True)
+	number = db.Column(db.Integer, unique=True)
+	completed = db.Column(db.Boolean)
+	start = db.Column(db.DateTime)
+	finish = db.Column(db.DateTime)
+
+	def __init__(self, number):
+		self.number = number
+		self.completed = False
+		self.start = datetime.utcnow()
+		self.finish = datetime.utcnow()
+
 class Team(Base):
 	__tablename__ = 'teams'
 
