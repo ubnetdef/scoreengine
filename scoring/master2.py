@@ -154,8 +154,8 @@ class Master(object):
 			checkData[key] = random.choice(checkDataInitial[key])
 
 		# Special handling of "USERPASS"
-		if "USERPASS" in checkData:
-			(checkData["USER"], checkData["PASS"]) = checkData["USERPASS"].split("||")
+		if "USERPASS" in checkData and "||" in checkData["USERPASS"]:
+			checkData["USER"], checkData["PASS"] = checkData["USERPASS"].split("||", 1)
 
 			del checkData["USERPASS"]
 
