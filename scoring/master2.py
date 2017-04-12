@@ -94,7 +94,7 @@ class Master(object):
 					requests.post("http://{}/internalGiveMoney".format(config.BANK["SERVER"]), data={
 						'username': config.BANK["USER"],
 						'password': config.BANK["PASS"],
-						'team': team["id"]
+						'team': task.result["team_id"]
 					})
 
 				# Remove from the tasks
