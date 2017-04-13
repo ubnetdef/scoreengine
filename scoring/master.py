@@ -29,7 +29,7 @@ class Master(object):
 
 	def run(self):
 		if self.round > 0:
-			print("ScoreEngine starting from round #{}".format(self.round))
+			print("ScoreEngine starting from round #{}".format(self.round+1))
 
 		while True:
 			self.round += 1
