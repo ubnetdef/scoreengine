@@ -34,13 +34,12 @@ def main(args):
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='ScoreEngine control center')
 
-	parser.add_argument('--reset', help='reset all existing checks', action='store_true', default=False)
-
 	group_round = parser.add_mutually_exclusive_group()
 	group_round.add_argument('--round', help='round to start at', type=int, default=0)
 	group_round.add_argument('--resume', help='start with the highest finished round', action='store_true', default=False)
+	group_round.add_argument('--reset', help='reset all existing checks', action='store_true', default=False)
 
-	group_type = parser.add_mutually_exclusive_group()
+	group_type = parser.add_mutually_exclusive_group(required=True)
 	group_type.add_argument('--master', help='do not use the task queue', action='store_true')
 	group_type.add_argument('--worker', help='only handle checks from the task queue', action='store_true')
 
