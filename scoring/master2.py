@@ -94,7 +94,7 @@ class Master(object):
 					requests.post("http://{}/internalGiveMoney".format(config.BANK["SERVER"]), data={
 						'username': config.BANK["USER"],
 						'password': config.BANK["PASS"],
-						'team': team["id"]
+						'team': task.result["team_id"]
 					})
 
 				# Remove from the tasks
@@ -154,8 +154,8 @@ class Master(object):
 			checkData[key] = random.choice(checkDataInitial[key])
 
 		# Special handling of "USERPASS"
-		if "USERPASS" in checkData:
-			(checkData["USER"], checkData["PASS"]) = checkData["USERPASS"].split("||")
+		if "USERPASS" in checkData and "||" in checkData["USERPASS"]:
+			checkData["USER"], checkData["PASS"] = checkData["USERPASS"].split("||", 1)
 
 			del checkData["USERPASS"]
 
