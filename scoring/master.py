@@ -28,6 +28,9 @@ class Master(object):
 		self.sleep_endrange = (config.ROUND["time"]+config.ROUND["jitter"]+1)
 
 	def run(self):
+		if self.round > 0:
+			print("ScoreEngine starting from round #{}".format(self.round))
+
 		while True:
 			self.round += 1
 
@@ -91,10 +94,14 @@ class Master(object):
 
 			# Finish the round if it's done
 			self.round_tasks[round].remove((team, service))
+			finishedRound = False
+
 			if len(self.round_tasks[round]) == 0:
 				roundObj = session.query(Round).filter(Round.number == round).first()
 				roundObj.completed = True
 				roundObj.finish = datetime.utcnow()
+
+				finishedRound = True
 
 				# Delete from our tracking array
 				del self.round_tasks[round]
@@ -106,6 +113,9 @@ class Master(object):
 			# Print out some data
 			printLock.acquire()
 			print("Round: {:04d} | {} | Service: {} | Passed: {}".format(round, team["name"].ljust(8), service["name"].ljust(15), check.getPassed()))
+
+			if finishedRound:
+				print("Round: {:04} has been completed!".format(round))
 			printLock.release()
 
 			# Tell the Bank API to give some money
