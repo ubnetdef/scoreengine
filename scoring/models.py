@@ -26,10 +26,12 @@ class Team(Base):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(255), unique=True)
 	enabled = db.Column(db.Boolean)
+	check_team = db.Column(db.Boolean)
 
-	def __init__(self, name, enabled=True):
+	def __init__(self, name, enabled=True, check_team=False):
 		self.name = name
 		self.enabled = enabled
+		self.check_team = check_team
 
 class Service(Base):
 	__tablename__ = 'services'

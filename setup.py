@@ -14,6 +14,11 @@ try:
 		teams[i] = Team("Team {}".format(i))
 		session.add(teams[i])
 
+	# Create the check team
+	check_team = config.TEAMS["MAX_NUM"] + 1
+	teams[check_team] = Team("Team {}".format(i))
+	session.add(teams[check_team])
+
 	# Create services
 	for sconfig in config.SERVICES:
 		service = Service(sconfig.name, sconfig.group, sconfig.check)
