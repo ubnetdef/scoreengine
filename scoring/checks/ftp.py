@@ -11,7 +11,8 @@ from tempfile import NamedTemporaryFile
 ftp_config = {
 	'timeout': 15,
 	'prefix': 'scoreengine_',
-	'bufsize': 0
+	'bufsize': 0,
+	'directory': ''
 }
 # /DEFAULTS
 
@@ -34,7 +35,7 @@ def check_upload_download(check, data):
 	checkFile.write(hexlify(urandom(randomBytes)))
 	checkFile.seek(0)
 
-	checkFileName = basename(checkFile.name)
+	checkFileName = ftp_config["directory"] + basename(checkFile.name)
 	checkFileSize = getsize(checkFile.name)
 	ftp = None
 
