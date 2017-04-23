@@ -3,6 +3,11 @@
 venv
 config.py
 
+# Worker Server #
+#################
+worker_server/app.pid
+worker_server/error.log
+
 # Python #
 ##########
 *.py[co]
