@@ -16,7 +16,7 @@ try:
 
 	# Create the check team
 	check_team = config.TEAMS["MAX_NUM"] + 1
-	teams[check_team] = Team("Team {}".format(i))
+	teams[check_team] = Team("Team {}".format(check_team), check_team=True)
 	session.add(teams[check_team])
 
 	# Create services
