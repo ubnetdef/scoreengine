@@ -66,8 +66,12 @@ class Master(object):
 				if task.state == "PENDING":
 					continue
 
+				# Remove from the tasks
+				task.forget()
+				self.tasks.remove(t)
+
+				# Don't handle logging it
 				if not task.result["official"]:
-					task.forget()
 					continue
 
 				logger.info("Reaping {}".format(t))
@@ -106,10 +110,6 @@ class Master(object):
 						'team': task.result["team_id"]
 					})
 
-				# Remove from the tasks
-				task.forget()
-				self.tasks.remove(t)
-
 			time.sleep(config.ROUND["reaper"])
 
 	def start_trafficgen(self):
@@ -140,6 +140,7 @@ class Master(object):
 			# Create the tasks
 			for sc in teamservices:
 				task = scoring.worker.check_task.delay(sc)
+				self.tasks.append(task.id)
 				logger.info("Created Task #{}".format(task.id))
 
 			time.sleep(config.TRAFFICGEN["sleep"])
