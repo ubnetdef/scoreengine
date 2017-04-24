@@ -22,10 +22,10 @@ def main(args):
 		worker = Worker.worker(app=celery_app)
 		worker.run(**config.CELERY["WORKER"])
 	else:
-		if args.master:
-			from scoring.master import Master
-		else:
+		if args.queue:
 			from scoring.master2 import Master
+		else:
+			from scoring.master import Master
 		
 		master = Master(round=round)
 		master.run()
@@ -41,6 +41,7 @@ if __name__ == "__main__":
 
 	group_type = parser.add_mutually_exclusive_group(required=True)
 	group_type.add_argument('--master', help='do not use the task queue', action='store_true')
+	group_type.add_argument('--queue', help='become the master of the task queue', action='store_true')
 	group_type.add_argument('--worker', help='only handle checks from the task queue', action='store_true')
 
 	main(parser.parse_args())
