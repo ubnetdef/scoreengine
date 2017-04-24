@@ -19,6 +19,8 @@ def main(args):
 		round -= 1
 
 	if args.worker:
+		celery_app.autodiscover_tasks(['scoring.worker'])
+
 		worker = Worker.worker(app=celery_app)
 		worker.run(**config.CELERY["WORKER"])
 	else:

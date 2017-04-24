@@ -26,7 +26,7 @@ def check_imap_login(check, data):
 
 	try:
 		check.addOutput("Connecting to {HOST}:{PORT}...".format(**data))
-		imapObj = imaplib.IMAP4(data["HOST"], data["PORT"])
+		imapObj = imaplib.IMAP4(data["HOST"], int(data["PORT"]))
 		check.addOutput("Connected!")
 
 		check.addOutput("Logging in as {USER}...".format(**data))
