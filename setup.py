@@ -15,7 +15,7 @@ try:
 		session.add(teams[i])
 
 	# Create the check team
-	check_team = config.TEAMS["MAX_NUM"] + 1
+	check_team = config.TEAMS["MAX_NUM"]
 	teams[check_team] = Team("Team {}".format(check_team), check_team=True)
 	session.add(teams[check_team])
 
