@@ -66,6 +66,9 @@ class Master(object):
 				if task.state == "PENDING":
 					continue
 
+				# Log that we're reaping it
+				logger.info("Reaping {} (Official={official})".format(t, **task.result))
+
 				# Don't handle logging it
 				if not task.result["official"]:
 					# Remove from the tasks
@@ -74,7 +77,6 @@ class Master(object):
 
 					continue
 
-				logger.info("Reaping {}".format(t))
 				session = scoring.Session()
 
 				# Add the successful check
