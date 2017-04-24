@@ -66,12 +66,12 @@ class Master(object):
 				if task.state == "PENDING":
 					continue
 
-				# Remove from the tasks
-				task.forget()
-				self.tasks.remove(t)
-
 				# Don't handle logging it
 				if not task.result["official"]:
+					# Remove from the tasks
+					task.forget()
+					self.tasks.remove(t)
+
 					continue
 
 				logger.info("Reaping {}".format(t))
@@ -109,6 +109,10 @@ class Master(object):
 						'password': config.BANK["PASS"],
 						'team': task.result["team_id"]
 					})
+
+				# Remove from the tasks
+				task.forget()
+				self.tasks.remove(t)
 
 			time.sleep(config.ROUND["reaper"])
 
