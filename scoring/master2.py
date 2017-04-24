@@ -145,7 +145,7 @@ class Master(object):
 			for sc in teamservices:
 				task = scoring.worker.check_task.delay(sc)
 				self.tasks.append(task.id)
-				logger.info("Created Task #{}".format(task.id))
+				logger.info("Created Task #{} (traffic-generator)".format(task.id))
 
 			time.sleep(config.TRAFFICGEN["sleep"])
 
@@ -182,7 +182,7 @@ class Master(object):
 			self.tasks.append(task.id)
 			self.round_tasks[round].append(task.id)
 
-			logger.info("Created Task #{}".format(task.id))
+			logger.info("Created Task #{} (round)".format(task.id))
 
 	def buildServiceCheck(self, session, round, team, service, check, official=False):
 		data = session.query(models.TeamService) \
