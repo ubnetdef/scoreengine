@@ -55,6 +55,12 @@ ROUND = {
 	"reaper": 5,
 }
 
+# Traffic Generator configuration
+TRAFFICGEN = {
+	"sleep": 10,
+	"amount": 10,
+}
+
 # This section is for overriding check-specific
 # configuration
 CHECKS = {

@@ -16,6 +16,7 @@ class Master(object):
 		self.tasks = []
 		self.round_tasks = {}
 		self.reaper = None
+		self.trafficgen = None
 
 		self.no_more_rounds = False
 
@@ -38,6 +39,10 @@ class Master(object):
 		self.reaper = threading.Thread(target=self.start_reaper)
 		self.reaper.start()
 
+		# Launch the "traffic generator" thread
+		self.trafficgen = threading.Thread(target=self.start_trafficgen)
+		self.trafficgen.start()
+
 		# Launch the round handler
 		self.start_rounds()
 
@@ -59,6 +64,10 @@ class Master(object):
 				task = scoring.worker.check_task.AsyncResult(t)
 				
 				if task.state == "PENDING":
+					continue
+
+				if not task.result["official"]:
+					task.forget()
 					continue
 
 				logger.info("Reaping {}".format(t))
@@ -103,6 +112,38 @@ class Master(object):
 
 			time.sleep(config.ROUND["reaper"])
 
+	def start_trafficgen(self):
+		while not self.no_more_rounds:
+			# This is pretty much a lightweight round
+			# Grab all the Team Services that are (currently) enabled
+			session = scoring.Session()
+			teams = [t.id for t in session.query(models.Team).filter(models.Team.enabled == True).all()]
+			services = session.query(models.Service).filter(models.Service.enabled == True).all()
+			teamservices = []
+
+			for team in teams:
+				for service in services:
+					check = {
+						"name": service.name,
+						"group": service.group,
+						"func": service.check,
+					}
+					teamservices.append(self.buildServiceCheck(session, -1, team, service.id, check))
+
+			# Shuffle it up
+			random.shuffle(teamservices)
+
+			# Slice
+			gen_amount = config.TRAFFICGEN["amount"]
+			teamservices = teamservices[:gen_amount]
+
+			# Create the tasks
+			for sc in teamservices:
+				task = scoring.worker.check_task.delay(sc)
+				logger.info("Created Task #{}".format(task.id))
+
+			time.sleep(config.TRAFFICGEN["sleep"])
+
 	def start_round(self, round):
 		# Grab all the Team Services that are (currently) enabled
 		session = scoring.Session()
@@ -117,7 +158,7 @@ class Master(object):
 					"group": service.group,
 					"func": service.check,
 				}
-				teamservices.append(self.buildServiceCheck(session, round, team, service.id, check))
+				teamservices.append(self.buildServiceCheck(session, round, team, service.id, check, official=True))
 
 		# Start the round
 		session.add(models.Round(round))
@@ -138,7 +179,7 @@ class Master(object):
 
 			logger.info("Created Task #{}".format(task.id))
 
-	def buildServiceCheck(self, session, round, team, service, check):
+	def buildServiceCheck(self, session, round, team, service, check, official=False):
 		data = session.query(models.TeamService) \
 			.filter(models.TeamService.team_id == team, models.TeamService.service_id == service) \
 			.all()
@@ -167,4 +208,5 @@ class Master(object):
 			"check": check,
 			"passed": False,
 			"output": [],
+			"official": official,
 		}
