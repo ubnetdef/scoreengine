@@ -59,6 +59,8 @@ class Master(object):
 			# Go to sleep
 			time.sleep(random.randrange(self.sleep_startrange, self.sleep_endrange))
 
+		logger.info("Round Handler exited main event loop")
+
 	def start_reaper(self):
 		while not self.no_more_rounds or len(self.tasks) > 0:
 			# Iterate over the tasks, check for any that are completed
@@ -123,6 +125,8 @@ class Master(object):
 
 			time.sleep(config.ROUND["reaper"])
 
+		logger.info("Reaper exited main event loop")
+
 	def start_trafficgen(self):
 		while not self.no_more_rounds:
 			# This is pretty much a lightweight round
@@ -159,6 +163,8 @@ class Master(object):
 			self.task_lock.release()
 
 			time.sleep(config.TRAFFICGEN["sleep"])
+
+		logger.info("Traffic Generator exited main event loop")
 
 	def start_round(self, round):
 		# Grab all the Team Services that are (currently) enabled
