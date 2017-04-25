@@ -180,7 +180,8 @@ class Master(object):
 		session.add(models.Round(round))
 		self.round_tasks[round] = []
 
-		# Close our DB session
+		# Commit + close our DB session
+		session.commit()
 		session.close()
 
 		# Shuffle it up
