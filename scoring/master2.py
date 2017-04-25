@@ -18,8 +18,6 @@ class Master(object):
 		self.reaper = None
 		self.trafficgen = None
 
-		self.task_lock = threading.Lock()
-
 		self.no_more_rounds = False
 
 		self.sleep_startrange = (config.ROUND["time"]-config.ROUND["jitter"])
@@ -118,10 +116,7 @@ class Master(object):
 
 				# Remove from the tasks
 				task.forget()
-
-				self.task_lock.acquire()
 				self.tasks.remove(t)
-				self.task_lock.release()
 
 			time.sleep(config.ROUND["reaper"])
 
@@ -145,6 +140,9 @@ class Master(object):
 					}
 					teamservices.append(self.buildServiceCheck(session, -1, team, service.id, check))
 
+			# Close our DB session
+			session.close()
+
 			# Shuffle it up
 			random.shuffle(teamservices)
 
@@ -153,14 +151,10 @@ class Master(object):
 			teamservices = teamservices[:gen_amount]
 
 			# Create the tasks
-			self.task_lock.acquire()
-
 			for sc in teamservices:
 				task = scoring.worker.check_task.delay(sc)
 				self.tasks.append(task.id)
 				logger.info("Created Task #{} (traffic-generator)".format(task.id))
-			
-			self.task_lock.release()
 
 			time.sleep(config.TRAFFICGEN["sleep"])
 
@@ -187,23 +181,18 @@ class Master(object):
 		self.round_tasks[round] = []
 
 		# Close our DB session
-		session.commit()
 		session.close()
 
 		# Shuffle it up
 		random.shuffle(teamservices)
 
 		# Create the tasks
-		self.task_lock.acquire()
-
 		for sc in teamservices:
 			task = scoring.worker.check_task.delay(sc)
 			self.tasks.append(task.id)
 			self.round_tasks[round].append(task.id)
 
 			logger.info("Created Task #{} (round)".format(task.id))
-
-		self.task_lock.release()
 
 	def buildServiceCheck(self, session, round, team, service, check, official=False):
 		data = session.query(models.TeamService) \
