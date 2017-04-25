@@ -1,5 +1,5 @@
 from datetime import datetime
-from scoring.logger import logger
+from scoring.logger import logger, round_logger, traffic_logger, reaper_logger
 import config
 import random
 import requests
@@ -57,7 +57,7 @@ class Master(object):
 			# Go to sleep
 			time.sleep(random.randrange(self.sleep_startrange, self.sleep_endrange))
 
-		logger.info("Round Handler exited main event loop")
+		round_logger.info("Exited main event loop")
 
 	def start_reaper(self):
 		while not self.no_more_rounds or len(self.tasks) > 0:
@@ -69,7 +69,7 @@ class Master(object):
 					continue
 
 				# Log that we're reaping it
-				logger.info("Reaping {} (Official={official})".format(t, **task.result))
+				reaper_logger.info("Reaping {} (Official={official})".format(t, **task.result))
 
 				# Don't handle logging it
 				if not task.result["official"]:
@@ -120,7 +120,7 @@ class Master(object):
 
 			time.sleep(config.ROUND["reaper"])
 
-		logger.info("Reaper exited main event loop")
+		reaper_logger.info("Exited main event loop")
 
 	def start_trafficgen(self):
 		while not self.no_more_rounds:
@@ -154,13 +154,16 @@ class Master(object):
 			for sc in teamservices:
 				task = scoring.worker.check_task.delay(sc)
 				self.tasks.append(task.id)
-				logger.info("Created Task #{} (traffic-generator)".format(task.id))
+				traffic_logger.info("Created Task #{}".format(task.id))
 
 			time.sleep(config.TRAFFICGEN["sleep"])
 
-		logger.info("Traffic Generator exited main event loop")
+		traffic_logger.info("Exited main event loop")
 
 	def start_round(self, round):
+		# Log it
+		round_logger.info("Starting round #{}".format(round))
+
 		# Grab all the Team Services that are (currently) enabled
 		session = scoring.Session()
 		teams = [t.id for t in session.query(models.Team).filter(models.Team.enabled == True).all()]
@@ -193,7 +196,7 @@ class Master(object):
 			self.tasks.append(task.id)
 			self.round_tasks[round].append(task.id)
 
-			logger.info("Created Task #{} (round)".format(task.id))
+			round_logger.info("Created Task #{}".format(task.id))
 
 	def buildServiceCheck(self, session, round, team, service, check, official=False):
 		data = session.query(models.TeamService) \

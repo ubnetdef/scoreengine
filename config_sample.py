@@ -76,6 +76,30 @@ TEAMS = {
 	"MAX_NUM": 11,
 }
 
+# Logging
+LOGGING = {
+	'version': 1,
+	'formatters': {
+		'standard': {
+			'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+		},
+	},
+	'handlers': {
+		'default': {
+			'level':'INFO',
+			'class':'logging.StreamHandler',
+			'formatter': 'standard',
+		},
+	},
+	'loggers': {
+		'scoreengine': {
+			'handlers': ['default'],
+			'level': 'INFO',
+			'propagate': True,
+		},
+	},
+}
+
 # All the services. Woah!
 SERVICES = [
 	# ICMP Ping

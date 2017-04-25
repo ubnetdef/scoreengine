@@ -1,10 +1,12 @@
+import config
 import logging
+import logging.config
 
+# Setup logging
+logging.config.dictConfig(config.LOGGING)
+
+# Create our loggers
 logger = logging.getLogger("scoreengine")
-logger.setLevel(logging.INFO)
-
-formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
-
-handler = logging.StreamHandler()
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+round_logger = logging.getLogger("scoreengine.round")
+traffic_logger = logging.getLogger("scoreengine.traffic")
+reaper_logger = logging.getLogger("scoreengine.reaper")
