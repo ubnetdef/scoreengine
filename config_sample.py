@@ -52,7 +52,7 @@ CELERY = {
 ROUND = {
 	"time": 60,
 	"jitter": 5,
-	"reaper": 5,
+	"reaper": 1,
 }
 
 # Traffic Generator configuration
