@@ -55,12 +55,17 @@ class Master(object):
 			round_thread.start()
 
 			# Go to sleep
-			time.sleep(random.randrange(self.sleep_startrange, self.sleep_endrange))
+			nsecs = random.randrange(self.sleep_startrange, self.sleep_endrange)
+			round_logger.debug("Round fired off. Sleeping for {} seconds".format(nsecs))
+			time.sleep(nsecs)
 
-		round_logger.info("Exited main event loop")
+		round_logger.debug("Exited main event loop")
 
 	def start_reaper(self):
 		while not self.no_more_rounds or len(self.tasks) > 0:
+			# Logger
+			reaper_logger.debug("Starting new reaping cycle")
+
 			# Iterate over the tasks, check for any that are completed
 			for t in self.tasks:
 				task = scoring.worker.check_task.AsyncResult(t)
@@ -69,10 +74,13 @@ class Master(object):
 					continue
 
 				# Log that we're reaping it
-				reaper_logger.info("Reaping {} (Official={official})".format(t, **task.result))
+				reaper_logger.info("Reaping #{}".format(t))
 
 				# Don't handle logging it
 				if not task.result["official"]:
+					# Log
+					reaper_logger.debug("Task #{} is not an scored task".format(t))
+
 					# Remove from the tasks
 					task.forget()
 					self.tasks.remove(t)
@@ -98,6 +106,9 @@ class Master(object):
 					roundObj.completed = True
 					roundObj.finish = datetime.utcnow()
 
+					# Log
+					round_logger.info("Round #{} finished".format(round))
+
 					# Delete from our tracking array
 					del self.round_tasks[round]
 
@@ -118,12 +129,15 @@ class Master(object):
 				task.forget()
 				self.tasks.remove(t)
 
+			reaper_logger.debug("Finished reaping cycle")
 			time.sleep(config.ROUND["reaper"])
 
-		reaper_logger.info("Exited main event loop")
+		reaper_logger.debug("Exited main event loop")
 
 	def start_trafficgen(self):
 		while not self.no_more_rounds:
+			traffic_logger.debug("Starting a new cycle for traffic generation")
+
 			# This is pretty much a lightweight round
 			# Grab all the Team Services that are (currently) enabled
 			session = scoring.Session()
@@ -156,9 +170,10 @@ class Master(object):
 				self.tasks.append(task.id)
 				traffic_logger.info("Created Task #{}".format(task.id))
 
+			traffic_logger.debug("Cycle for traffic generation finished")
 			time.sleep(config.TRAFFICGEN["sleep"])
 
-		traffic_logger.info("Exited main event loop")
+		traffic_logger.debug("Exited main event loop")
 
 	def start_round(self, round):
 		# Log it
@@ -197,6 +212,8 @@ class Master(object):
 			self.round_tasks[round].append(task.id)
 
 			round_logger.info("Created Task #{}".format(task.id))
+
+		round_logger.debug("Finished creating round tasks")
 
 	def buildServiceCheck(self, session, round, team, service, check, official=False):
 		data = session.query(models.TeamService) \
