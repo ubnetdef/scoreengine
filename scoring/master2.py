@@ -50,6 +50,9 @@ class Master(object):
 		while not self.no_more_rounds:
 			self.round += 1
 
+			# Let's log
+			logger.info("Starting round #{}".format(self.round))
+
 			# Start our round thread
 			round_thread = threading.Thread(target=self.start_round, args=(self.round,))
 			round_thread.start()
@@ -107,7 +110,7 @@ class Master(object):
 					roundObj.finish = datetime.utcnow()
 
 					# Log
-					round_logger.info("Round #{} finished".format(round))
+					logger.info("Round #{} finished".format(round))
 
 					# Delete from our tracking array
 					del self.round_tasks[round]
@@ -177,7 +180,7 @@ class Master(object):
 
 	def start_round(self, round):
 		# Log it
-		round_logger.info("Starting round #{}".format(round))
+		round_logger.info("Round thread #{} starting".format(round))
 
 		# Grab all the Team Services that are (currently) enabled
 		session = scoring.Session()
@@ -213,7 +216,7 @@ class Master(object):
 
 			round_logger.info("Created Task #{}".format(task.id))
 
-		round_logger.debug("Finished creating round tasks")
+		round_logger.debug("Round thread #{} completed".format(round))
 
 	def buildServiceCheck(self, session, round, team, service, check, official=False):
 		data = session.query(models.TeamService) \
