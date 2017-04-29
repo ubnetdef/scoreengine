@@ -26,9 +26,9 @@ class BaseMaster(object):
 		self.sleep_startrange = config.ROUND["time"] - config.ROUND["jitter"]
 		self.sleep_endrange = config.ROUND["time"] + config.ROUND["jitter"] + 1
 
-	def buildServiceCheck(self, session, round, team, service, check, official=False):
+	def buildServiceCheck(self, session, round, team_id, service, check, official=False, team_name=""):
 		data = session.query(models.TeamService) \
-			.filter(models.TeamService.team_id == team, models.TeamService.service_id == service) \
+			.filter(models.TeamService.team_id == team_id, models.TeamService.service_id == service) \
 			.all()
 
 		checkDataInitial = {}
@@ -48,7 +48,8 @@ class BaseMaster(object):
 			del checkData["USERPASS"]
 
 		return {
-			"team_id": team,
+			"team_id": team_id,
+			"team_name": team_name,
 			"service_id": service,
 			"round": round,
 			"config": checkData,
@@ -57,6 +58,29 @@ class BaseMaster(object):
 			"output": [],
 			"official": official,
 		}
+
+	def getTeamServices(self, session, round, official=False):
+		"""Grab all the Team Services that are (currently) enabled"""
+
+		session = scoring.Session()
+		teams = session.query(models.Team).filter(models.Team.enabled == True).all()
+		services = session.query(models.Service).filter(models.Service.enabled == True).all()
+		teamservices = []
+
+		for team in teams:
+			for service in services:
+				check = {
+					"name": service.name,
+					"group": service.group,
+					"func": service.check,
+				}
+				teamservices.append(self.buildServiceCheck(session, round, team.id, service.id, check, official, team_name=team.name))
+
+		# Shuffle it up
+		random.shuffle(teamservices)
+
+		return teamservices
+
 
 class OldMaster(BaseMaster):
 
@@ -79,23 +103,8 @@ class OldMaster(BaseMaster):
 		# Make a new session for this thread
 		session = scoring.Session()
 
-		# Get all the active teams for this round
-		teams = []
-		for team in session.query(models.Team).filter(models.Team.enabled == True):
-			teams.append({
-				'id': team.id,
-				'name': team.name
-			})
-
-		# Get all active services for this round
-		services = []
-		for service in session.query(models.Service).filter(models.Service.enabled == True):
-			services.append({
-				'id': service.id,
-				'name': service.name,
-				'group': service.group,
-				'check': service.check
-			})
+		# Get the active services from all active teams
+		teamservices = self.getTeamServices(session, round, official=True)
 
 		# Create a new round
 		self.round_tasks[round] = []
@@ -106,21 +115,17 @@ class OldMaster(BaseMaster):
 		session.close()
 
 		# Start the checks!
-		for team in teams:
-			for service in services:
-				self.round_tasks[round].append((team, service))
-				threading.Thread(target=self.new_check, args=(team, service, round)).start()
+		for ts in teamservices:
+			team = {"id": ts["team_id"], "name": ts["team_name"]}
+			service = ts["check"].copy()
+			service["id"] = ts["service_id"]
 
-	def new_check(self, team, service, round, dryRun=False):
-		check = {
-			"name": service["name"],
-			"group": service["group"],
-			"func": service["check"]
-		}
-		session = scoring.Session()
-		sc = self.buildServiceCheck(session, round, team["id"], service["id"], check, not dryRun)
-		session.close()
+			self.round_tasks[round].append((team, service))
 
+			check_thread = threading.Thread(target=self.new_check, args=(team, service, round, ts))
+			check_thread.start()
+
+	def new_check(self, team, service, round, sc, dryRun=False):
 		check = scoring.worker.check(sc)
 
 		if dryRun:
@@ -157,9 +162,8 @@ class OldMaster(BaseMaster):
 
 			# Print out some data
 			printLock.acquire()
-			print("Round: {:04d} | {} | Service: {} | Passed: {}".format(round, team["name"].ljust(8),
-																		 service["name"].ljust(15),
-																		 check.getPassed()))
+			print("Round: {:04d} | {} | Service: {} | Passed: {}".format(
+				round, team["name"].ljust(8), service["name"].ljust(15), check.getPassed()))
 
 			if finishedRound:
 				print("Round: {:04} has been completed!".format(round))
@@ -250,10 +254,10 @@ class NewMaster(BaseMaster):
 
 				# Add the successful check
 				chk = models.Check(task.result["team_id"],
-								   task.result["service_id"],
-								   task.result["round"],
-								   task.result["passed"],
-								   "\n".join(task.result["output"]))
+						   task.result["service_id"],
+						   task.result["round"],
+						   task.result["passed"],
+						   "\n".join(task.result["output"]))
 				session.add(chk)
 
 				# Add the round, if it's the last one
@@ -300,24 +304,8 @@ class NewMaster(BaseMaster):
 			# This is pretty much a lightweight round
 			# Grab all the Team Services that are (currently) enabled
 			session = scoring.Session()
-			teams = [t.id for t in session.query(models.Team).filter(models.Team.enabled == True).all()]
-			services = session.query(models.Service).filter(models.Service.enabled == True).all()
-			teamservices = []
-
-			for team in teams:
-				for service in services:
-					check = {
-						"name": service.name,
-						"group": service.group,
-						"func": service.check,
-					}
-					teamservices.append(self.buildServiceCheck(session, -1, team, service.id, check))
-
-			# Close our DB session
+			teamservices = self.getTeamServices(session, -1)
 			session.close()
-
-			# Shuffle it up
-			random.shuffle(teamservices)
 
 			# Slice
 			gen_amount = config.TRAFFICGEN["amount"]
@@ -340,18 +328,7 @@ class NewMaster(BaseMaster):
 
 		# Grab all the Team Services that are (currently) enabled
 		session = scoring.Session()
-		teams = [t.id for t in session.query(models.Team).filter(models.Team.enabled == True).all()]
-		services = session.query(models.Service).filter(models.Service.enabled == True).all()
-		teamservices = []
-
-		for team in teams:
-			for service in services:
-				check = {
-					"name": service.name,
-					"group": service.group,
-					"func": service.check,
-				}
-				teamservices.append(self.buildServiceCheck(session, round, team, service.id, check, official=True))
+		teamservices = self.getTeamServices(session, round, official=True)
 
 		# Start the round
 		session.add(models.Round(round))
@@ -360,9 +337,6 @@ class NewMaster(BaseMaster):
 		# Commit + close our DB session
 		session.commit()
 		session.close()
-
-		# Shuffle it up
-		random.shuffle(teamservices)
 
 		# Create the tasks
 		for sc in teamservices:
