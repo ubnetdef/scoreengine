@@ -14,10 +14,11 @@ import scoring.models as models
 import scoring.worker
 
 
-printLock = threading.Lock()  # Used by OldMaster
+printLock = threading.Lock()  # Used by ThreadMaster
 
 
 class BaseMaster(object):
+
 	def __init__(self, round):
 		logger.info("Starting ScoreEngine...")
 
@@ -93,10 +94,10 @@ class BaseMaster(object):
 		return teamservices
 
 
-class OldMaster(BaseMaster):
+class ThreadMaster(BaseMaster):
 
 	def __init__(self, round=0):
-		super(OldMaster, self).__init__(round)
+		super(ThreadMaster, self).__init__(round)
 
 	def run(self):
 		if self.round > 0:
@@ -191,10 +192,10 @@ class OldMaster(BaseMaster):
 					team["id"], round, service["name"]))
 
 
-class NewMaster(BaseMaster):
+class QueueMaster(BaseMaster):
 
 	def __init__(self, round=0):
-		super(NewMaster, self).__init__(round)
+		super(QueueMaster, self).__init__(round)
 		self.tasks = []
 		self.reaper = None
 		self.trafficgen = None
