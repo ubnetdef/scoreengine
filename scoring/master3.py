@@ -70,7 +70,7 @@ class OldMaster(BaseMaster):
 		while True:
 			self.round += 1
 
-			round_thread = threading.Thread(self.new_round, args=(self.round,))
+			round_thread = threading.Thread(target=self.new_round, args=(self.round,))
 			round_thread.start()
 
 			time.sleep(random.randrange(self.sleep_startrange, self.sleep_endrange))
@@ -109,11 +109,16 @@ class OldMaster(BaseMaster):
 		for team in teams:
 			for service in services:
 				self.round_tasks[round].append((team, service))
-				threading.Thread(self.new_check, args=(team, service, round)).start()
+				threading.Thread(target=self.new_check, args=(team, service, round)).start()
 
 	def new_check(self, team, service, round, dryRun=False):
+		check = {
+			"name": service["name"],
+			"group": service["group"],
+			"func": service["check"]
+		}
 		session = scoring.Session()
-		sc = self.buildServiceCheck(session, round, team["id"], service["id"], service["check"], not dryRun)
+		sc = self.buildServiceCheck(session, round, team["id"], service["id"], check, not dryRun)
 		session.close()
 
 		check = scoring.worker.check(sc)
