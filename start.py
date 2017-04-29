@@ -25,9 +25,9 @@ def main(args):
 		worker.run(**config.CELERY["WORKER"])
 	else:
 		if args.queue:
-			from scoring.master2 import Master
+			from scoring.master import QueueMaster as Master
 		else:
-			from scoring.master import Master
+			from scoring.master import ThreadMaster as Master
 		
 		master = Master(round=round)
 		master.run()
