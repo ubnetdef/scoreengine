@@ -25,6 +25,17 @@ class BaseMaster(object):
 		self.round_tasks = {}
 		self.sleep_startrange = config.ROUND["time"] - config.ROUND["jitter"]
 		self.sleep_endrange = config.ROUND["time"] + config.ROUND["jitter"] + 1
+		self.no_more_rounds = False
+
+		# Catch CTRL+C signal
+		signal.signal(signal.SIGINT, self.shutdown)
+
+	def shutdown(self, signal_, frame):
+		logger.warn("Caught CTRL+C. Turning off spawning of additional rounds.")
+
+		self.no_more_rounds = True
+		remaining = sum(len(r) for r in self.round_tasks.itervalues())
+		logger.warn("{} tasks remaining. Waiting for them to finish before shutting down.".format(remaining))
 
 	def buildServiceCheck(self, session, round, team_id, service, check, official=False, team_name=""):
 		data = session.query(models.TeamService) \
@@ -91,7 +102,7 @@ class OldMaster(BaseMaster):
 		if self.round > 0:
 			logger.debug("ScoreEngine starting from round #{}".format(self.round + 1))
 
-		while True:
+		while not self.no_more_rounds:
 			self.round += 1
 
 			round_thread = threading.Thread(target=self.new_round, args=(self.round,))
@@ -187,16 +198,6 @@ class NewMaster(BaseMaster):
 		self.tasks = []
 		self.reaper = None
 		self.trafficgen = None
-		self.no_more_rounds = False
-
-		# Catch CTRL+C signal
-		signal.signal(signal.SIGINT, self.shutdown)
-
-	def shutdown(self, signal_, frame):
-		logger.warn("Caught CTRL+C. Turning off spawning of additional rounds.")
-
-		self.no_more_rounds = True
-		logger.warn("{} tasks remaining. Waiting for them to finish before shutting down.".format(len(self.tasks)))
 
 	def run(self):
 		# Launch the reaper thread
