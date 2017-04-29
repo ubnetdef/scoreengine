@@ -89,7 +89,7 @@ class OldMaster(BaseMaster):
 
 	def run(self):
 		if self.round > 0:
-			print("ScoreEngine starting from round #{}".format(self.round + 1))
+			logger.debug("ScoreEngine starting from round #{}".format(self.round + 1))
 
 		while True:
 			self.round += 1
@@ -100,6 +100,8 @@ class OldMaster(BaseMaster):
 			time.sleep(random.randrange(self.sleep_startrange, self.sleep_endrange))
 
 	def new_round(self, round):
+		logger.info("Starting round #{}".format(round))
+
 		# Make a new session for this thread
 		session = scoring.Session()
 
@@ -130,10 +132,10 @@ class OldMaster(BaseMaster):
 
 		if dryRun:
 			printLock.acquire()
-			print("---------[ TEAM: {} | SERVICE: {}".format(team["name"], service["name"]))
+			round_logger.info("---------[ TEAM: {} | SERVICE: {}".format(team["name"], service["name"]))
 			for line in check.getOutput():
 				print(line)
-			print("---------[ PASSED: {}".format(check.getPassed()))
+			round_logger.info("---------[ PASSED: {}".format(check.getPassed()))
 			printLock.release()
 		else:
 			session = scoring.Session()
@@ -162,18 +164,20 @@ class OldMaster(BaseMaster):
 
 			# Print out some data
 			printLock.acquire()
-			print("Round: {:04d} | {} | Service: {} | Passed: {}".format(
+			round_logger.info("Round: {:04d} | {} | Service: {} | Passed: {}".format(
 				round, team["name"].ljust(8), service["name"].ljust(15), check.getPassed()))
 
 			if finishedRound:
-				print("Round: {:04} has been completed!".format(round))
+				logger.info("Round: {:04} has been completed!".format(round))
 			printLock.release()
 
 			# Tell the Bank API to give some money
 			if check.getPassed() and config.BANK["ENABLED"]:
 				r = requests.post("http://{}/internalGiveMoney".format(config.BANK["SERVER"]),
-								  data={'username': config.BANK["USER"], 'password': config.BANK["PASS"],
-										'team': team["id"]})
+						  data={'username': config.BANK["USER"], 'password': config.BANK["PASS"],
+							'team': team["id"]})
+				round_logger.debug("Transferring money to team {} for round {} of {}".format(
+					team["id"], round, service["name"]))
 
 
 class NewMaster(BaseMaster):
