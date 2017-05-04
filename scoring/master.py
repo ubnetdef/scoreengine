@@ -1,4 +1,3 @@
-from __future__ import print_function
 from datetime import datetime
 import importlib
 import random
@@ -9,14 +8,14 @@ import time
 
 import config
 import scoring
-from scoring.logger import logger, reaper_logger, round_logger, traffic_logger
 import scoring.models as models
+import scoring.logger as logger
 import scoring.worker
 
 class BaseMaster(object):
 
 	def __init__(self, round):
-		logger.info("Starting ScoreEngine...")
+		logger.main.info("Starting ScoreEngine...")
 
 		self.round = round
 		self.round_tasks = {}
@@ -28,11 +27,11 @@ class BaseMaster(object):
 		signal.signal(signal.SIGINT, self.shutdown)
 
 	def shutdown(self, signal_, frame):
-		logger.warn("Caught CTRL+C. Turning off spawning of additional rounds.")
+		logger.main.warn("Caught CTRL+C. Turning off spawning of additional rounds.")
 
 		self.no_more_rounds = True
 		remaining = sum(len(r) for r in self.round_tasks.itervalues())
-		logger.warn("{} tasks remaining. Waiting for them to finish before shutting down.".format(remaining))
+		logger.main.warn("{} tasks remaining. Waiting for them to finish before shutting down.".format(remaining))
 
 	def build_service_check(self, session, round, team, service, check, official=False):
 		data = session.query(models.TeamService) \
@@ -99,7 +98,7 @@ class BaseMaster(object):
 			'password': config.BANK["PASS"],
 			'team': check["team_id"]
 		})
-		round_logger.debug("Transferring money to {} for service {} being up".format(
+		logger.round.debug("Transferring money to {} for service {} being up".format(
 			check["team_name"], check["service_name"]))
 
 
@@ -110,13 +109,13 @@ class ThreadMaster(BaseMaster):
 
 	def run(self):
 		if self.round > 0:
-			logger.debug("ScoreEngine starting from round #{}".format(self.round + 1))
+			logger.main.debug("ScoreEngine starting from round #{}".format(self.round + 1))
 
 		while not self.no_more_rounds:
 			self.round += 1
 
 			# Let's log
-			logger.info("Starting round #{}".format(self.round))
+			logger.main.info("Starting round #{}".format(self.round))
 
 			# Start our round thread
 			round_thread = threading.Thread(target=self.start_round, args=(self.round,))
@@ -124,12 +123,12 @@ class ThreadMaster(BaseMaster):
 
 			# Go to sleep
 			nsecs = random.randrange(self.sleep_startrange, self.sleep_endrange)
-			round_logger.debug("Round fired off. Sleeping for {} seconds".format(nsecs))
+			logger.round.debug("Round fired off. Sleeping for {} seconds".format(nsecs))
 			time.sleep(nsecs)
 
 	def start_round(self, round):
 		# Log it
-		round_logger.info("Round thread #{} starting".format(round))
+		logger.round.info("Round thread #{} starting".format(round))
 
 		# Make a new session for this thread
 		session = scoring.Session()
@@ -152,7 +151,7 @@ class ThreadMaster(BaseMaster):
 			check_thread = threading.Thread(target=self.new_check, args=(round, ts))
 			check_thread.start()
 
-		round_logger.debug("Round thread #{} completed".format(round))
+		logger.round.debug("Round thread #{} completed".format(round))
 
 	def new_check(self, round, ts):
 		check = scoring.worker.check(ts)
@@ -182,11 +181,11 @@ class ThreadMaster(BaseMaster):
 		session.close()
 
 		# Print out some data
-		round_logger.info("Round: {} | {} | Service: {} | Passed: {}".format(
+		logger.round.info("Round: {} | {} | Service: {} | Passed: {}".format(
 			round, ts["team_name"], ts["service_name"], check.getPassed()))
 
 		if finishedRound:
-			logger.info("Round #{} finished".format(round))
+			logger.main.info("Round #{} finished".format(round))
 
 		# Check Passed Hook
 		if check.getPassed():
@@ -218,7 +217,7 @@ class QueueMaster(BaseMaster):
 			self.round += 1
 
 			# Let's log
-			logger.info("Starting round #{}".format(self.round))
+			logger.main.info("Starting round #{}".format(self.round))
 
 			# Start our round thread
 			round_thread = threading.Thread(target=self.start_round, args=(self.round,))
@@ -226,15 +225,15 @@ class QueueMaster(BaseMaster):
 
 			# Go to sleep
 			nsecs = random.randrange(self.sleep_startrange, self.sleep_endrange)
-			round_logger.debug("Round fired off. Sleeping for {} seconds".format(nsecs))
+			logger.round.debug("Round fired off. Sleeping for {} seconds".format(nsecs))
 			time.sleep(nsecs)
 
-		round_logger.debug("Exited main event loop")
+		logger.round.debug("Exited main event loop")
 
 	def start_reaper(self):
 		while not self.no_more_rounds or len(self.tasks) > 0:
 			# Logger
-			reaper_logger.debug("Starting new reaping cycle")
+			logger.reaper.debug("Starting new reaping cycle")
 
 			# Iterate over the tasks, check for any that are completed
 			for t in self.tasks:
@@ -244,12 +243,12 @@ class QueueMaster(BaseMaster):
 					continue
 
 				# Log that we're reaping it
-				reaper_logger.info("Reaping #{}".format(t))
+				logger.reaper.info("Reaping #{}".format(t))
 
 				# Don't handle logging it
 				if not task.result["official"]:
 					# Log
-					reaper_logger.debug("Task #{} is not an scored task".format(t))
+					logger.reaper.debug("Task #{} is not an scored task".format(t))
 
 					# Remove from the tasks
 					task.forget()
@@ -277,7 +276,7 @@ class QueueMaster(BaseMaster):
 					roundObj.finish = datetime.utcnow()
 
 					# Log
-					logger.info("Round #{} finished".format(round))
+					logger.main.info("Round #{} finished".format(round))
 
 					# Delete from our tracking array
 					del self.round_tasks[round]
@@ -294,14 +293,14 @@ class QueueMaster(BaseMaster):
 				task.forget()
 				self.tasks.remove(t)
 
-			reaper_logger.debug("Finished reaping cycle")
+			logger.reaper.debug("Finished reaping cycle")
 			time.sleep(config.ROUND["reaper"])
 
-		reaper_logger.debug("Exited main event loop")
+		logger.reaper.debug("Exited main event loop")
 
 	def start_trafficgen(self):
 		while not self.no_more_rounds:
-			traffic_logger.debug("Starting a new cycle for traffic generation")
+			logger.traffic.debug("Starting a new cycle for traffic generation")
 
 			# This is pretty much a lightweight round
 			# Grab all the Team Services that are (currently) enabled
@@ -317,16 +316,16 @@ class QueueMaster(BaseMaster):
 			for ts in teamservices:
 				task = scoring.worker.check_task.delay(ts)
 				self.tasks.append(task.id)
-				traffic_logger.info("Created Task #{}".format(task.id))
+				logger.traffic.info("Created Task #{}".format(task.id))
 
-			traffic_logger.debug("Cycle for traffic generation finished")
+			logger.traffic.debug("Cycle for traffic generation finished")
 			time.sleep(config.TRAFFICGEN["sleep"])
 
-		traffic_logger.debug("Exited main event loop")
+		logger.traffic.debug("Exited main event loop")
 
 	def start_round(self, round):
 		# Log it
-		round_logger.info("Round thread #{} starting".format(round))
+		logger.round.info("Round thread #{} starting".format(round))
 
 		# Grab all the Team Services that are (currently) enabled
 		session = scoring.Session()
@@ -346,6 +345,6 @@ class QueueMaster(BaseMaster):
 			self.tasks.append(task.id)
 			self.round_tasks[round].append(task.id)
 
-			round_logger.info("Created Task #{}".format(task.id))
+			logger.round.info("Created Task #{}".format(task.id))
 
-		round_logger.debug("Round thread #{} completed".format(round))
+		logger.round.debug("Round thread #{} completed".format(round))
