@@ -13,10 +13,6 @@ from scoring.logger import logger, reaper_logger, round_logger, traffic_logger
 import scoring.models as models
 import scoring.worker
 
-
-printLock = threading.Lock()  # Used by ThreadMaster
-
-
 class BaseMaster(object):
 
 	def __init__(self, round):
@@ -38,9 +34,9 @@ class BaseMaster(object):
 		remaining = sum(len(r) for r in self.round_tasks.itervalues())
 		logger.warn("{} tasks remaining. Waiting for them to finish before shutting down.".format(remaining))
 
-	def buildServiceCheck(self, session, round, team_id, service, check, official=False, team_name=""):
+	def build_service_check(self, session, round, team, service, check, official=False):
 		data = session.query(models.TeamService) \
-			.filter(models.TeamService.team_id == team_id, models.TeamService.service_id == service) \
+			.filter(models.TeamService.team_id == team.id, models.TeamService.service_id == service.id) \
 			.all()
 
 		checkDataInitial = {}
@@ -60,9 +56,10 @@ class BaseMaster(object):
 			del checkData["USERPASS"]
 
 		return {
-			"team_id": team_id,
-			"team_name": team_name,
-			"service_id": service,
+			"team_id": team.id,
+			"team_name": team.name,
+			"service_id": service.id,
+			"service_name": service.name,
 			"round": round,
 			"config": checkData,
 			"check": check,
@@ -71,7 +68,7 @@ class BaseMaster(object):
 			"official": official,
 		}
 
-	def getTeamServices(self, session, round, official=False):
+	def get_team_services(self, session, round, official=False):
 		"""Grab all the Team Services that are (currently) enabled"""
 
 		session = scoring.Session()
@@ -86,12 +83,24 @@ class BaseMaster(object):
 					"group": service.group,
 					"func": service.check,
 				}
-				teamservices.append(self.buildServiceCheck(session, round, team.id, service.id, check, official, team_name=team.name))
+				teamservices.append(self.build_service_check(session, round, team, service, check, official))
 
 		# Shuffle it up
 		random.shuffle(teamservices)
 
 		return teamservices
+
+	def check_passed_hook(self, check):
+		if not config.BANK["ENABLED"]:
+			return
+
+		r = requests.post("http://{}/internalGiveMoney".format(config.BANK["SERVER"]), data={
+			'username': config.BANK["USER"],
+			'password': config.BANK["PASS"],
+			'team': check["team_id"]
+		})
+		round_logger.debug("Transferring money to {} for service {} being up".format(
+			check["team_name"], check["service_name"]))
 
 
 class ThreadMaster(BaseMaster):
@@ -106,19 +115,27 @@ class ThreadMaster(BaseMaster):
 		while not self.no_more_rounds:
 			self.round += 1
 
-			round_thread = threading.Thread(target=self.new_round, args=(self.round,))
+			# Let's log
+			logger.info("Starting round #{}".format(self.round))
+
+			# Start our round thread
+			round_thread = threading.Thread(target=self.start_round, args=(self.round,))
 			round_thread.start()
 
-			time.sleep(random.randrange(self.sleep_startrange, self.sleep_endrange))
+			# Go to sleep
+			nsecs = random.randrange(self.sleep_startrange, self.sleep_endrange)
+			round_logger.debug("Round fired off. Sleeping for {} seconds".format(nsecs))
+			time.sleep(nsecs)
 
-	def new_round(self, round):
-		logger.info("Starting round #{}".format(round))
+	def start_round(self, round):
+		# Log it
+		round_logger.info("Round thread #{} starting".format(round))
 
 		# Make a new session for this thread
 		session = scoring.Session()
 
 		# Get the active services from all active teams
-		teamservices = self.getTeamServices(session, round, official=True)
+		teamservices = self.get_team_services(session, round, official=True)
 
 		# Create a new round
 		self.round_tasks[round] = []
@@ -130,66 +147,50 @@ class ThreadMaster(BaseMaster):
 
 		# Start the checks!
 		for ts in teamservices:
-			team = {"id": ts["team_id"], "name": ts["team_name"]}
-			service = ts["check"].copy()
-			service["id"] = ts["service_id"]
+			self.round_tasks[round].append(ts)
 
-			self.round_tasks[round].append((team, service))
-
-			check_thread = threading.Thread(target=self.new_check, args=(team, service, round, ts))
+			check_thread = threading.Thread(target=self.new_check, args=(round, ts))
 			check_thread.start()
 
-	def new_check(self, team, service, round, sc, dryRun=False):
-		check = scoring.worker.check(sc)
+		round_logger.debug("Round thread #{} completed".format(round))
 
-		if dryRun:
-			printLock.acquire()
-			round_logger.info("---------[ TEAM: {} | SERVICE: {}".format(team["name"], service["name"]))
-			for line in check.getOutput():
-				print(line)
-			round_logger.info("---------[ PASSED: {}".format(check.getPassed()))
-			printLock.release()
-		else:
-			session = scoring.Session()
+	def new_check(self, round, ts):
+		check = scoring.worker.check(ts)
 
-			# Add the check
-			session.add(
-				models.Check(team["id"], service["id"], round, check.getPassed(), check.getOutput()))
+		session = scoring.Session()
 
-			# Finish the round if it's done
-			self.round_tasks[round].remove((team, service))
-			finishedRound = False
+		# Add the check
+		session.add(
+			models.Check(ts["team_id"], ts["service_id"], round, check.getPassed(), check.getOutput()))
 
-			if len(self.round_tasks[round]) == 0:
-				roundObj = session.query(models.Round).filter(models.Round.number == round).first()
-				roundObj.completed = True
-				roundObj.finish = datetime.utcnow()
+		# Finish the round if it's done
+		self.round_tasks[round].remove(ts)
+		finishedRound = False
 
-				finishedRound = True
+		if len(self.round_tasks[round]) == 0:
+			roundObj = session.query(models.Round).filter(models.Round.number == round).first()
+			roundObj.completed = True
+			roundObj.finish = datetime.utcnow()
 
-				# Delete from our tracking array
-				del self.round_tasks[round]
+			finishedRound = True
 
-			# Commit and close
-			session.commit()
-			session.close()
+			# Delete from our tracking array
+			del self.round_tasks[round]
 
-			# Print out some data
-			printLock.acquire()
-			round_logger.info("Round: {:04d} | {} | Service: {} | Passed: {}".format(
-				round, team["name"].ljust(8), service["name"].ljust(15), check.getPassed()))
+		# Commit and close
+		session.commit()
+		session.close()
 
-			if finishedRound:
-				logger.info("Round: {:04} has been completed!".format(round))
-			printLock.release()
+		# Print out some data
+		round_logger.info("Round: {} | {} | Service: {} | Passed: {}".format(
+			round, ts["team_name"], ts["service_name"], check.getPassed()))
 
-			# Tell the Bank API to give some money
-			if check.getPassed() and config.BANK["ENABLED"]:
-				r = requests.post("http://{}/internalGiveMoney".format(config.BANK["SERVER"]),
-						  data={'username': config.BANK["USER"], 'password': config.BANK["PASS"],
-							'team': team["id"]})
-				round_logger.debug("Transferring money to team {} for round {} of {}".format(
-					team["id"], round, service["name"]))
+		if finishedRound:
+			logger.info("Round #{} finished".format(round))
+
+		# Check Passed Hook
+		if check.getPassed():
+			self.check_passed_hook(check)
 
 
 class QueueMaster(BaseMaster):
@@ -285,14 +286,9 @@ class QueueMaster(BaseMaster):
 				session.commit()
 				session.close()
 
-				# Bank Hook
-				# Tell the Bank API to give some money
-				if task.result["passed"] and config.BANK["ENABLED"]:
-					requests.post("http://{}/internalGiveMoney".format(config.BANK["SERVER"]), data={
-						'username': config.BANK["USER"],
-						'password': config.BANK["PASS"],
-						'team': task.result["team_id"]
-					})
+				# Check Passed Hook
+				if task.result["passed"]:
+					self.check_passed_hook(task.result)
 
 				# Remove from the tasks
 				task.forget()
@@ -310,7 +306,7 @@ class QueueMaster(BaseMaster):
 			# This is pretty much a lightweight round
 			# Grab all the Team Services that are (currently) enabled
 			session = scoring.Session()
-			teamservices = self.getTeamServices(session, -1)
+			teamservices = self.get_team_services(session, -1)
 			session.close()
 
 			# Slice
@@ -318,8 +314,8 @@ class QueueMaster(BaseMaster):
 			teamservices = teamservices[:gen_amount]
 
 			# Create the tasks
-			for sc in teamservices:
-				task = scoring.worker.check_task.delay(sc)
+			for ts in teamservices:
+				task = scoring.worker.check_task.delay(ts)
 				self.tasks.append(task.id)
 				traffic_logger.info("Created Task #{}".format(task.id))
 
@@ -334,7 +330,7 @@ class QueueMaster(BaseMaster):
 
 		# Grab all the Team Services that are (currently) enabled
 		session = scoring.Session()
-		teamservices = self.getTeamServices(session, round, official=True)
+		teamservices = self.get_team_services(session, round, official=True)
 
 		# Start the round
 		session.add(models.Round(round))
@@ -345,8 +341,8 @@ class QueueMaster(BaseMaster):
 		session.close()
 
 		# Create the tasks
-		for sc in teamservices:
-			task = scoring.worker.check_task.delay(sc)
+		for ts in teamservices:
+			task = scoring.worker.check_task.delay(ts)
 			self.tasks.append(task.id)
 			self.round_tasks[round].append(task.id)
 

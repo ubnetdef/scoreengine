@@ -1,6 +1,6 @@
 from billiard.exceptions import SoftTimeLimitExceeded
 from scoring import celery_app
-from scoring.logger import logger
+from scoring.logger import worker_logger
 import importlib
 
 
@@ -13,7 +13,7 @@ def check(sc):
 	service = ServiceConfig(sc)
 
 	try:
-		logger.debug("Using module '{}'".format(service.module_name))
+		worker_logger.debug("Using module '{}'".format(service.module_name))
 		service.check()
 	except:
 		service.setPassed(False)
