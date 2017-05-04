@@ -25,9 +25,9 @@ def main(args):
 		worker.run(**config.CELERY["WORKER"])
 	else:
 		if args.queue:
-			from scoring.master import QueueMaster as Master
+			from scoring.masters.queue import QueueMaster as Master
 		else:
-			from scoring.master import ThreadMaster as Master
+			from scoring.masters.thread import ThreadMaster as Master
 		
 		master = Master(round=round)
 		master.run()
@@ -42,8 +42,8 @@ if __name__ == "__main__":
 	group_round.add_argument('--reset', help='reset all existing checks', action='store_true', default=False)
 
 	group_type = parser.add_mutually_exclusive_group(required=True)
-	group_type.add_argument('--master', help='do not use the task queue', action='store_true')
-	group_type.add_argument('--queue', help='become the master of the task queue', action='store_true')
-	group_type.add_argument('--worker', help='only handle checks from the task queue', action='store_true')
+	group_type.add_argument('--thread', help='use the thread master for running tasks', action='store_true')
+	group_type.add_argument('--queue', help='use the queue master for running tasks', action='store_true')
+	group_type.add_argument('--worker', help='launch a queue worker for handling tasks', action='store_true')
 
 	main(parser.parse_args())
