@@ -21,9 +21,11 @@ http_config = {
 if "http" in config.CHECKS:
 	http_config.update(config.CHECKS["http"])
 
+FAKE_UA = UserAgent(fallback='Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
+
 http_headers = {
 	"Connection": "close",
-	"User-Agent": UserAgent().random
+	"User-Agent": FAKE_UA.random
 }
 # /CONFIG
 
