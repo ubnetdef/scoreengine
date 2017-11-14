@@ -1,0 +1,1 @@
+* * * * * curl -s http://192.168.2.50:8080/hello/$(hostname) > /dev/null

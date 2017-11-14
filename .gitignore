@@ -5,8 +5,8 @@ config.py
 
 # Worker Server #
 #################
-worker_server/app.pid
-worker_server/error.log
+workers/server/app.pid
+workers/server/error.log
 
 # Python #
 ##########

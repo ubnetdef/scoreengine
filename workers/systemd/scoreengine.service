@@ -1,0 +1,16 @@
+# /etc/systemd/system/scoreengine.service
+[Unit]
+Description=ScoreEngine Service
+After=network.target
+
+[Service]
+Type=simple
+User=engine
+Group=engine
+ExecStart=/bin/bash -c 'python /home/engine/scoreengine/start.py --worker'
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=scoreengine
+
+[Install]
+WantedBy=multi-user.target
