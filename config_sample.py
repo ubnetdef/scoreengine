@@ -30,6 +30,9 @@ DATABASE_EXTRA = {
 }
 
 # Bank-API configuration
+# As a note, the username/password configured here
+# should be a user in the 'bank' that is a staff member (has the 'staff' flag)
+# Typically, this is the user with the username of 'scoring'
 BANK = {
 	"ENABLED": False,
 	"SERVER": "localhost",
